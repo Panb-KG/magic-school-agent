@@ -66,6 +66,13 @@ def build_agent(ctx=None):
         download_file, generate_file_url, delete_file, list_student_files
     )
     from tools.voice_assessment_tool import assess_reading, practice_reading
+    from tools.dashboard_tool import get_student_dashboard, get_student_profile_summary
+    from tools.visualization_tool import (
+        get_visual_schedule,
+        get_points_trend,
+        get_achievement_wall_data,
+        get_homework_progress
+    )
     
     tools = [
         # 学生管理工具
@@ -116,6 +123,14 @@ def build_agent(ctx=None):
         # 语音评估工具
         assess_reading,
         practice_reading,
+        
+        # 仪表盘和可视化工具
+        get_student_dashboard,
+        get_student_profile_summary,
+        get_visual_schedule,
+        get_points_trend,
+        get_achievement_wall_data,
+        get_homework_progress,
     ]
     
     return create_agent(

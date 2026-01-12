@@ -492,9 +492,533 @@ tail -f logs/error.log
 
 如有问题，请联系技术支持或查看项目文档。
 
+## 🌐 Web前端部署架构
+
+### 系统架构图
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        用户浏览器                           │
+│              (React/Vue Web应用 + WebSocket)                │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+        ┌─────────────┴─────────────┐
+        │                           │
+┌───────▼────────┐          ┌──────▼──────────┐
+│   HTTP API     │          │  WebSocket     │
+│   (端口80)     │          │  (端口8765)     │
+└───────┬────────┘          └──────┬──────────┘
+        │                           │
+┌───────▼───────────────────────────▼──────────────┐
+│                  Nginx (反向代理)                  │
+│   /api/* → Backend (端口3000)                     │
+│   /ws/* → WebSocket (端口8765)                    │
+│   /* → Static Files (前端静态资源)                 │
+└───────────────────┬───────────────────────────────┘
+                    │
+        ┌───────────┴───────────┐
+        │                       │
+┌───────▼────────┐    ┌────────▼────────┐
+│  Backend API   │    │  WebSocket      │
+│  (LangGraph)   │    │  Server         │
+│  端口3000      │    │  Python Async   │
+└───────┬────────┘    └────────┬────────┘
+        │                      │
+        └──────────┬───────────┘
+                   │
+    ┌──────────────▼───────────────┐
+    │     PostgreSQL 数据库         │
+    │  (学生、课程、作业、成就等)   │
+    └──────────────┬───────────────┘
+                   │
+    ┌──────────────▼───────────────┐
+    │      S3 对象存储             │
+    │  (文件、课件、音频等)         │
+    └──────────────────────────────┘
+```
+
+### 前端部署步骤
+
+#### 1. 准备前端项目
+
+参考 [FRONTEND_DEPLOYMENT.md](FRONTEND_DEPLOYMENT.md) 创建Web前端项目。
+
+#### 2. 构建生产版本
+
+```bash
+# 进入前端项目目录
+cd magic-school-frontend
+
+# 安装依赖
+npm install
+
+# 构建生产版本
+npm run build
+```
+
+#### 3. 配置Nginx
+
+在服务器上编辑Nginx配置文件：
+
+```bash
+sudo nano /etc/nginx/sites-available/magic-school
+```
+
+添加以下配置：
+
+```nginx
+# HTTP配置
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    # 前端静态文件
+    location / {
+        root /var/www/magic-school/dist;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+        
+        # 缓存配置
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+
+    # API代理到后端
+    location /api/ {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    # WebSocket代理
+    location /ws/ {
+        proxy_pass http://localhost:8765;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 86400;  # 24小时
+    }
+
+    # 日志配置
+    access_log /var/log/nginx/magic-school-access.log;
+    error_log /var/log/nginx/magic-school-error.log;
+}
+```
+
+启用配置并重启Nginx：
+
+```bash
+# 创建软链接
+sudo ln -s /etc/nginx/sites-available/magic-school /etc/nginx/sites-enabled/
+
+# 测试配置
+sudo nginx -t
+
+# 重启Nginx
+sudo systemctl restart nginx
+```
+
+#### 4. 上传前端文件到服务器
+
+```bash
+# 本地打包完成后，上传到服务器
+scp -r dist/* user@your-server:/var/www/magic-school/dist/
+
+# 设置权限
+sudo chown -R www-data:www-data /var/www/magic-school
+sudo chmod -R 755 /var/www/magic-school
+```
+
+---
+
+## 🔌 WebSocket服务器部署
+
+### 1. 安装依赖
+
+```bash
+# 安装websockets库
+pip install websockets
+```
+
+### 2. 配置环境变量
+
+在 `.env` 文件中添加：
+
+```bash
+# WebSocket配置
+WS_HOST=0.0.0.0
+WS_PORT=8765
+```
+
+### 3. 启动WebSocket服务器
+
+#### 方式1：直接启动
+
+```bash
+python src/websocket_server.py
+```
+
+#### 方式2：使用systemd服务（推荐）
+
+创建服务文件：
+
+```bash
+sudo nano /etc/systemd/system/magic-school-ws.service
+```
+
+添加以下内容：
+
+```ini
+[Unit]
+Description=Magic School WebSocket Server
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/workspace/projects
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+EnvironmentFile=/workspace/projects/.env
+ExecStart=/usr/bin/python3 src/websocket_server.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+启动服务：
+
+```bash
+# 重载systemd配置
+sudo systemctl daemon-reload
+
+# 启动服务
+sudo systemctl start magic-school-ws
+
+# 设置开机自启
+sudo systemctl enable magic-school-ws
+
+# 查看服务状态
+sudo systemctl status magic-school-ws
+
+# 查看日志
+sudo journalctl -u magic-school-ws -f
+```
+
+### 4. 测试WebSocket连接
+
+使用浏览器开发者工具或在线WebSocket测试工具：
+
+```javascript
+// 浏览器控制台测试
+const ws = new WebSocket('ws://your-domain.com/ws/小明');
+
+ws.onopen = () => {
+  console.log('WebSocket连接成功');
+  // 订阅频道
+  ws.send(JSON.stringify({
+    type: 'subscribe',
+    channels: ['dashboard', 'achievements']
+  }));
+};
+
+ws.onmessage = (event) => {
+  console.log('收到消息:', event.data);
+};
+
+ws.onerror = (error) => {
+  console.error('WebSocket错误:', error);
+};
+
+ws.onclose = () => {
+  console.log('WebSocket连接关闭');
+};
+```
+
+---
+
+## 🚀 完整部署流程
+
+### 1. 服务器准备
+
+```bash
+# 更新系统
+sudo apt update && sudo apt upgrade -y
+
+# 安装基础软件
+sudo apt install -y nginx python3 python3-pip postgresql postgresql-contrib git
+
+# 安装Python依赖
+pip3 install -r requirements.txt
+pip3 install websockets
+```
+
+### 2. 配置数据库
+
+```bash
+# 启动PostgreSQL
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+# 创建数据库和用户
+sudo -u postgres psql
+```
+
+```sql
+CREATE DATABASE magic_school;
+CREATE USER magic_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE magic_school TO magic_user;
+\q
+```
+
+### 3. 配置环境变量
+
+```bash
+# 复制环境变量模板
+cp .env.example .env
+
+# 编辑配置
+nano .env
+```
+
+添加以下配置：
+
+```bash
+# 数据库
+PGDATABASE_URL=postgresql://magic_user:your_password@localhost/magic_school
+
+# 对象存储
+COZE_BUCKET_ENDPOINT_URL=https://your-s3-endpoint.com
+COZE_BUCKET_NAME=your-bucket-name
+
+# 大模型
+COZE_INTEGRATION_MODEL_BASE_URL=https://api.coze.com/v1
+COZE_WORKLOAD_IDENTITY_API_KEY=your-api-key
+
+# WebSocket
+WS_HOST=0.0.0.0
+WS_PORT=8765
+
+# 工作空间
+COZE_WORKSPACE_PATH=/workspace/projects
+```
+
+### 4. 初始化数据库
+
+```bash
+# 同步模型
+eval $(python /workspace/projects/scripts/load_env.py)
+bash /source/alembic/generate_models.sh
+
+# 执行迁移
+eval $(python /workspace/projects/scripts/load_env.py)
+bash /source/alembic/upgrade.sh
+```
+
+### 5. 启动后端服务
+
+```bash
+# 方式1：直接运行
+python src/main.py
+
+# 方式2：使用systemd服务
+sudo nano /etc/systemd/system/magic-school-api.service
+```
+
+```ini
+[Unit]
+Description=Magic School API Server
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/workspace/projects
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+EnvironmentFile=/workspace/projects/.env
+ExecStart=/usr/bin/python3 src/main.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+# 启动API服务
+sudo systemctl start magic-school-api
+sudo systemctl enable magic-school-api
+sudo systemctl status magic-school-api
+```
+
+### 6. 启动WebSocket服务
+
+```bash
+# 参考上文"WebSocket服务器部署"章节
+sudo systemctl start magic-school-ws
+sudo systemctl enable magic-school-ws
+```
+
+### 7. 部署前端
+
+```bash
+# 参考上文"Web前端部署架构"章节
+# 上传前端文件
+scp -r dist/* user@your-server:/var/www/magic-school/dist/
+
+# 配置Nginx
+sudo nano /etc/nginx/sites-available/magic-school
+
+# 启用配置
+sudo ln -s /etc/nginx/sites-available/magic-school /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+### 8. 验证部署
+
+```bash
+# 检查所有服务状态
+sudo systemctl status magic-school-api
+sudo systemctl status magic-school-ws
+sudo systemctl status nginx
+sudo systemctl status postgresql
+
+# 测试API
+curl http://localhost:3000/api/v1/profile/小明
+
+# 测试前端
+curl http://localhost/
+
+# 查看日志
+sudo journalctl -u magic-school-api -f
+sudo journalctl -u magic-school-ws -f
+sudo tail -f /var/log/nginx/magic-school-error.log
+```
+
+---
+
+## 📋 部署检查清单
+
+- [ ] Python 3.8+ 已安装
+- [ ] 所有Python依赖已安装
+- [ ] PostgreSQL 已配置并启动
+- [ ] 数据库迁移已完成
+- [ ] `.env` 文件已配置
+- [ ] S3对象存储已配置
+- [ ] 后端API服务已启动
+- [ ] WebSocket服务已启动
+- [ ] 前端项目已构建
+- [ ] Nginx已配置并重启
+- [ ] 所有服务开机自启已设置
+- [ ] 防火墙端口已开放（80, 3000, 8765）
+- [ ] 域名DNS已解析
+- [ ] SSL证书已配置（可选）
+
+---
+
+## 🔒 安全配置建议
+
+### 1. 启用HTTPS
+
+使用Let's Encrypt免费SSL证书：
+
+```bash
+# 安装certbot
+sudo apt install certbot python3-certbot-nginx
+
+# 获取证书
+sudo certbot --nginx -d your-domain.com
+
+# 自动续期
+sudo certbot renew --dry-run
+```
+
+### 2. 配置防火墙
+
+```bash
+# 允许SSH、HTTP、HTTPS
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# 启用防火墙
+sudo ufw enable
+
+# 查看状态
+sudo ufw status
+```
+
+### 3. 限制API访问
+
+在Nginx配置中添加IP白名单或速率限制：
+
+```nginx
+# 速率限制
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
+
+location /api/ {
+    limit_req zone=api_limit burst=20;
+    ...
+}
+```
+
+### 4. 定期备份数据库
+
+创建备份脚本：
+
+```bash
+#!/bin/bash
+# /opt/backup-db.sh
+
+BACKUP_DIR="/opt/backups"
+DATE=$(date +%Y%m%d_%H%M%S)
+PGDATABASE_URL="postgresql://magic_user:your_password@localhost/magic_school"
+
+mkdir -p $BACKUP_DIR
+
+pg_dump $PGDATABASE_URL > $BACKUP_DIR/magic_school_$DATE.sql
+
+# 保留最近7天的备份
+find $BACKUP_DIR -name "magic_school_*.sql" -mtime +7 -delete
+```
+
+添加到crontab：
+
+```bash
+# 每天凌晨2点备份
+0 2 * * * /opt/backup-db.sh
+```
+
+---
+
 ## 📄 许可证
 
 本项目仅供学习和研究使用。
+
+---
+
+## 📚 相关文档
+
+- [API文档](API_DOCUMENTATION.md) - 完整的API接口说明
+- [前端部署指南](FRONTEND_DEPLOYMENT.md) - Web前端开发部署详细指南
+- [README.md](README.md) - 项目概览和快速开始
 
 ---
 
