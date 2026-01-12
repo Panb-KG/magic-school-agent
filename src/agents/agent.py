@@ -65,6 +65,7 @@ def build_agent(ctx=None):
         upload_courseware, upload_achievement_icon,
         download_file, generate_file_url, delete_file, list_student_files
     )
+    from tools.voice_assessment_tool import assess_reading, practice_reading
     
     tools = [
         # 学生管理工具
@@ -111,6 +112,10 @@ def build_agent(ctx=None):
         generate_file_url,
         delete_file,
         list_student_files,
+        
+        # 语音评估工具
+        assess_reading,
+        practice_reading,
     ]
     
     return create_agent(
