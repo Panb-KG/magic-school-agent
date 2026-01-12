@@ -1,0 +1,1 @@
+export { PointsChart } from './PointsChart';
