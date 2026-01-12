@@ -193,6 +193,97 @@ def update_homework_status(homework_id: int, status: str, runtime: ToolRuntime) 
 
 
 @tool
+def verify_and_submit_homework(
+    student_name: str,
+    homework_title: str,
+    file_content: bytes = None,
+    proof_description: str = "",
+    runtime: ToolRuntime = None
+) -> str:
+    """验证并提交作业（带作业证明）
+    
+    当小巫师说"我已经完成作业"时使用此工具。会要求上传作业证明（照片或描述），
+    然后更新作业状态为已完成。
+    
+    Args:
+        student_name: 学生姓名
+        homework_title: 作业标题（部分匹配即可）
+        file_content: 作业证明文件内容（bytes，可选）
+        proof_description: 作业证明描述（如果没有文件，用文字描述作业内容）
+    
+    Returns:
+        操作结果
+    """
+    db = get_session()
+    try:
+        from storage.database.student_manager import StudentManager
+        student_mgr = StudentManager()
+        student = student_mgr.get_student_by_name(db, student_name)
+        
+        if not student:
+            return f"未找到姓名为{student_name}的小巫师"
+        
+        homework_mgr = HomeworkManager()
+        homeworks = homework_mgr.get_pending_homeworks(db, student.id)
+        
+        # 根据标题匹配作业
+        target_homework = None
+        for hw in homeworks:
+            if homework_title.lower() in hw.title.lower() or hw.title.lower() in homework_title.lower():
+                target_homework = hw
+                break
+        
+        if not target_homework:
+            return f"未找到标题包含\"{homework_title}\"的待完成作业。请检查作业标题是否正确。"
+        
+        # 处理作业证明
+        submission_url = None
+        if file_content:
+            # 上传作业证明文件
+            from tools.file_storage_tool import upload_homework_submission
+            file_key = upload_homework_submission(
+                file_content=file_content,
+                file_name=f"{target_homework.id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg",
+                student_id=student.id,
+                runtime=runtime
+            )
+            # 生成可访问的URL
+            from tools.file_storage_tool import generate_file_url
+            submission_url = generate_file_url(file_key=file_key, runtime=runtime)
+        elif proof_description:
+            # 如果没有文件，用描述作为证明
+            submission_url = f"proof_text:{proof_description}"
+        else:
+            # 两者都没有，要求提供证明
+            return f"请上传作业证明（照片）或描述作业完成情况，我才能确认你完成了作业\"{target_homework.title}\"哦！✨"
+        
+        # 提交作业
+        homework = homework_mgr.submit_homework(db, target_homework.id, submission_url)
+        
+        if homework:
+            # 给予积分奖励（作业完成后奖励10-20积分）
+            points = 15
+            student_mgr = StudentManager()
+            student_mgr.add_points(db, student.id, points)
+
+            # 检查是否可以升级魔法等级
+            current_points = getattr(student, 'total_points', 0) + points
+            new_magic_level = (current_points // 100) + 1
+            current_magic_level = getattr(student, 'magic_level', 1)
+            if new_magic_level > current_magic_level:
+                student_mgr.upgrade_magic_level(db, student.id)
+                return f"🎉 太棒了！你已经完成了作业\"{target_homework.title}\"！\n\n✨ 获得{points}个魔法积分！\n🏆 恭喜升级到{new_magic_level}级魔法师！\n\n你的努力就像施展了完美的魔法咒语！继续保持！"
+            else:
+                return f"🎉 太棒了！你已经完成了作业\"{target_homework.title}\"！\n\n✨ 获得{points}个魔法积分！\n\n你的努力就像施展了完美的魔法咒语！继续保持！"
+        else:
+            return f"提交作业失败，请再试一次"
+    except Exception as e:
+        return f"验证作业失败：{str(e)}"
+    finally:
+        db.close()
+
+
+@tool
 def delete_homework(homework_id: int, runtime: ToolRuntime) -> str:
     """删除作业
     

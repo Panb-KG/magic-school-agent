@@ -49,7 +49,14 @@ def build_agent(ctx=None):
     # 导入所有工具
     from tools.student_db_tool import create_student, get_student_info, add_student_points, upgrade_magic_level
     from tools.course_db_tool import add_course, get_weekly_schedule, update_course, delete_course
-    from tools.homework_db_tool import add_homework, get_homework_list, submit_homework, update_homework_status, delete_homework
+    from tools.homework_db_tool import (
+        add_homework,
+        get_homework_list,
+        submit_homework,
+        update_homework_status,
+        delete_homework,
+        verify_and_submit_homework
+    )
     from tools.courseware_db_tool import add_courseware, get_courseware_list, delete_courseware
     from tools.exercise_db_tool import add_exercise, get_exercise_list, get_weekly_exercise_stats
     from tools.achievement_db_tool import add_achievement, get_achievement_wall, get_all_achievements
@@ -78,6 +85,7 @@ def build_agent(ctx=None):
         submit_homework,
         update_homework_status,
         delete_homework,
+        verify_and_submit_homework,
         
         # 课件管理工具
         add_courseware,
