@@ -102,7 +102,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="header-content">
           <div className="logo">
             <span className="logo-icon">⚡</span>
-            <span className="logo-text">魔法学校</span>
+            <span className="logo-text">魔法课桌</span>
           </div>
 
           <Menu
@@ -127,7 +127,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <Content className="app-content">{children}</Content>
 
       <Footer className="app-footer">
-        <p>⚡ 魔法学校学习管理系统 · 让学习充满魔法</p>
+        <p>⚡ 魔法课桌学习助手智能体 · 让学习充满魔法</p>
         <p className="footer-text">© 2025 Magic School. All rights reserved.</p>
       </Footer>
     </Layout>

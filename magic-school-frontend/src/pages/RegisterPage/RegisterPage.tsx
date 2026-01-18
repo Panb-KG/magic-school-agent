@@ -55,7 +55,7 @@ const RegisterPage: React.FC = () => {
         <div className="register-header">
           <div className="logo">
             <span className="logo-icon">⚡</span>
-            <span className="logo-text">霍格沃茨魔法学校</span>
+            <span className="logo-text">魔法课桌</span>
           </div>
           <p className="register-subtitle">加入魔法家族，开启学习之旅 ✨</p>
         </div>

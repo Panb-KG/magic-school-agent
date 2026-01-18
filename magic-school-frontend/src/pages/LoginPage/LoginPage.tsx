@@ -35,7 +35,7 @@ const LoginPage: React.FC = () => {
         <div className="login-header">
           <div className="logo">
             <span className="logo-icon">⚡</span>
-            <span className="logo-text">霍格沃茨魔法学校</span>
+            <span className="logo-text">魔法课桌</span>
           </div>
           <p className="login-subtitle">让学习充满魔法 ✨</p>
         </div>
