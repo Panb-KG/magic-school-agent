@@ -18,8 +18,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="魔法学校学习管理系统 API",
-    description="支持多用户、家长管理、长期记忆的学习管理系统",
+    title="魔法课桌学习助手智能体 API",
+    description="支持多用户、家长管理、长期记忆的学习助手智能体",
     version="2.0.0"
 )
 
@@ -362,7 +362,7 @@ async def health_check():
     """健康检查"""
     return {
         "status": "healthy",
-        "service": "魔法学校学习管理系统",
+        "service": "魔法课桌学习助手智能体",
         "version": "2.0.0"
     }
 

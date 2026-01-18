@@ -47,7 +47,7 @@ export const Dashboard: React.FC = () => {
       {/* 页面标题 */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold magic-title mb-2">
-          ✨ 魔法学校学习仪表盘 ✨
+          ✨ 魔法课桌学习助手 ✨
         </h1>
         <p className="text-gray-600">
           欢迎, {dashboardData.profile.nickname || dashboardData.profile.name}!

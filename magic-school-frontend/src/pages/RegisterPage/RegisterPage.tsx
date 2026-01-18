@@ -251,7 +251,7 @@ const RegisterPage: React.FC = () => {
                 block
                 className="magic-button"
               >
-                {selectedRole === 'student' ? '加入魔法学校' : '成为魔法守护者'}
+                {selectedRole === 'student' ? '加入魔法课桌' : '成为魔法守护者'}
               </Button>
             </Form.Item>
           </Form>
@@ -265,7 +265,7 @@ const RegisterPage: React.FC = () => {
         </Card>
 
         <div className="page-footer">
-          <p>⚡ 魔法学校学习管理系统</p>
+          <p>⚡ 魔法课桌学习助手智能体</p>
           <p className="footer-text">© 2025 Magic School. All rights reserved.</p>
         </div>
       </div>

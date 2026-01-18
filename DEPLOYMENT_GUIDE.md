@@ -1024,4 +1024,4 @@ find $BACKUP_DIR -name "magic_school_*.sql" -mtime +7 -delete
 
 **✨ 让学习充满魔法，让成长充满乐趣！** ✨
 
-🧙‍♂️ 霍格沃茨魔法学校 - 学习管理智能体
+🧙‍♂️ 魔法课桌学习助手智能体

@@ -113,7 +113,7 @@ const LoginPage: React.FC = () => {
         </Card>
 
         <div className="login-footer">
-          <p>⚡ 魔法学校学习管理系统</p>
+          <p>⚡ 魔法课桌学习助手智能体</p>
           <p className="footer-text">© 2025 Magic School. All rights reserved.</p>
         </div>
       </div>
