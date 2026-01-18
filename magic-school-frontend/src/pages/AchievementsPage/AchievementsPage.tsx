@@ -1,11 +1,12 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useAPI } from '@/hooks/useAPI';
 import { getAchievementWall } from '@/api';
 import { AchievementWall } from '@/components';
 
 export const AchievementsPage: React.FC = () => {
-  const { studentName = '小明' } = useParams();
+  const { user } = useAuth();
+  const studentName = user?.student_name || user?.nickname || '小巫师';
 
   const { data: achievementData, loading, error } = useAPI(getAchievementWall, true, studentName);
 

@@ -1,11 +1,12 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useAPI } from '@/hooks/useAPI';
 import { getDashboard, getPointsTrend } from '@/api';
 import { ProfileCard, Schedule, PointsChart, AchievementWall, HomeworkList } from '@/components';
 
 export const Dashboard: React.FC = () => {
-  const { studentName = '小明' } = useParams();
+  const { user } = useAuth();
+  const studentName = user?.student_name || user?.nickname || '小巫师';
 
   // 获取仪表盘数据
   const { data: dashboardData, loading: dashboardLoading, error: dashboardError } =

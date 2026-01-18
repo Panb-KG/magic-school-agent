@@ -192,3 +192,185 @@ export interface ProfileSummary {
   featured_count: number;
   total_achievement_points: number;
 }
+
+// ========== 认证相关类型 ==========
+
+// 用户角色
+export type UserRole = 'student' | 'parent';
+
+// 登录请求
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+// 注册请求
+export interface RegisterRequest {
+  username: string;
+  password: string;
+  email?: string;
+  role: UserRole;
+  // 学生注册时的额外信息
+  student_name?: string;
+  nickname?: string;
+  grade?: string;
+  class_name?: string;
+  school?: string;
+  // 家长注册时的额外信息
+  real_name?: string;
+}
+
+// 登录/注册响应
+export interface AuthResponse {
+  success: boolean;
+  data: {
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+    user: UserInfo;
+  };
+  message?: string;
+}
+
+// 用户信息
+export interface UserInfo {
+  id: number;
+  username: string;
+  role: UserRole;
+  // 学生信息
+  student_name?: string;
+  nickname?: string;
+  grade?: string;
+  class_name?: string;
+  school?: string;
+  // 家长信息
+  real_name?: string;
+  linked_students?: number[];
+  created_at: string;
+}
+
+// 认证上下文
+export interface AuthContextType {
+  user: UserInfo | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (credentials: LoginRequest) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<void>;
+  logout: () => void;
+  refreshUserInfo: () => Promise<void>;
+}
+
+// ========== 家长管理相关类型 ==========
+
+// 学生信息（家长视角）
+export interface ParentStudentInfo {
+  id: number;
+  username: string;
+  student_name: string;
+  nickname: string;
+  grade: string;
+  class_name: string;
+  school: string;
+  avatar_url: string;
+  magic_level: number;
+  total_points: number;
+  linked_at: string;
+}
+
+// 对话历史记录
+export interface ConversationRecord {
+  conversation_id: string;
+  student_id: number;
+  student_name: string;
+  message_count: number;
+  last_message: string;
+  last_message_time: string;
+  created_at: string;
+}
+
+// 对话详情
+export interface ConversationDetail {
+  conversation_id: string;
+  student_id: number;
+  student_name: string;
+  messages: {
+    role: 'user' | 'assistant';
+    content: string;
+    timestamp: string;
+  }[];
+  created_at: string;
+  updated_at: string;
+}
+
+// ========== 长期记忆相关类型 ==========
+
+// 用户画像
+export interface UserProfile {
+  user_id: number;
+  username: string;
+  student_name?: string;
+  nickname?: string;
+  grade?: string;
+  learning_style: string;
+  interests: string[];
+  strengths: string[];
+  weaknesses: string[];
+  goals: string[];
+  preferences: {
+    response_style: string;
+    difficulty_level: string;
+    encouragement_level: string;
+  };
+  last_updated: string;
+}
+
+// 知识掌握度
+export interface KnowledgeMastery {
+  user_id: number;
+  subject: string;
+  topic: string;
+  mastery_level: number; // 0-100
+  practice_count: number;
+  correct_count: number;
+  last_practiced: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+}
+
+// 知识掌握度统计
+export interface KnowledgeStats {
+  user_id: number;
+  total_topics: number;
+  mastered_topics: number; // mastery_level >= 80
+  in_progress_topics: number; // mastery_level 50-79
+  weak_topics: number; // mastery_level < 50
+  average_mastery: number;
+  by_subject: {
+    subject: string;
+    total_topics: number;
+    average_mastery: number;
+  }[];
+  topics: KnowledgeMastery[];
+  last_updated: string;
+}
+
+// 对话摘要
+export interface ConversationSummary {
+  conversation_id: string;
+  user_id: number;
+  summary: string;
+  topics: string[];
+  sentiment: 'positive' | 'neutral' | 'negative';
+  message_count: number;
+  created_at: string;
+}
+
+// 记忆查询结果
+export interface MemoryQueryResult {
+  user_id: number;
+  relevant_memories: {
+    type: 'profile' | 'knowledge' | 'conversation';
+    content: any;
+    relevance: number;
+  }[];
+}

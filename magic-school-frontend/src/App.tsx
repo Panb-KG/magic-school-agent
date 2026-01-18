@@ -1,79 +1,252 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Dashboard, SchedulePage, AchievementsPage, HomeworkPage } from '@/pages';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { Layout, Menu, Avatar, Dropdown } from 'antd';
+import {
+  UserOutlined,
+  LogoutOutlined,
+  DashboardOutlined,
+  ScheduleOutlined,
+  TrophyOutlined,
+  BookOutlined,
+  HomeOutlined,
+  BrainOutlined,
+  TeamOutlined,
+} from '@ant-design/icons';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import PrivateRoute from '@/components/PrivateRoute';
+import {
+  Dashboard,
+  SchedulePage,
+  AchievementsPage,
+  HomeworkPage,
+  LoginPage,
+  RegisterPage,
+  ParentDashboardPage,
+  MemoryPage,
+} from '@/pages';
+import './App.css';
 
-function App() {
-  const studentName = '小明';
+const { Header, Content, Footer } = Layout;
+
+// 内部导航栏组件（需要认证）
+const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  const userMenuItems = [
+    {
+      key: 'profile',
+      icon: <UserOutlined />,
+      label: user?.role === 'parent' ? user?.real_name : user?.student_name || user?.username,
+    },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: '退出登录',
+      onClick: handleLogout,
+    },
+  ];
+
+  // 根据用户角色返回不同的菜单项
+  const getMenuItems = () => {
+    if (user?.role === 'parent') {
+      return [
+        {
+          key: 'parent-dashboard',
+          icon: <TeamOutlined />,
+          label: <Link to="/parent/dashboard">家长中心</Link>,
+        },
+        {
+          key: 'memory',
+          icon: <BrainOutlined />,
+          label: <Link to="/memory">记忆中心</Link>,
+        },
+      ];
+    } else {
+      return [
+        {
+          key: 'dashboard',
+          icon: <DashboardOutlined />,
+          label: <Link to="/dashboard">仪表盘</Link>,
+        },
+        {
+          key: 'schedule',
+          icon: <ScheduleOutlined />,
+          label: <Link to="/schedule">课程表</Link>,
+        },
+        {
+          key: 'achievements',
+          icon: <TrophyOutlined />,
+          label: <Link to="/achievements">成就墙</Link>,
+        },
+        {
+          key: 'homework',
+          icon: <BookOutlined />,
+          label: <Link to="/homework">作业</Link>,
+        },
+        {
+          key: 'memory',
+          icon: <BrainOutlined />,
+          label: <Link to="/memory">记忆中心</Link>,
+        },
+      ];
+    }
+  };
 
   return (
-    <Router>
-      <div className="min-h-screen">
-        {/* 导航栏 */}
-        <nav className="bg-white/95 backdrop-blur-sm shadow-lg sticky top-0 z-50">
-          <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center h-16">
-              {/* Logo */}
-              <div className="flex items-center space-x-2">
-                <span className="text-3xl">⚡</span>
-                <span className="text-xl font-bold magic-title">魔法学校</span>
-              </div>
-
-              {/* 导航链接 */}
-              <div className="flex space-x-1 md:space-x-4">
-                <Link
-                  to={`/dashboard/${studentName}`}
-                  className="px-3 py-2 rounded-lg text-sm md:text-base font-semibold text-gray-700 hover:text-magic-primary hover:bg-magic-primary/10 transition-all"
-                >
-                  📊 仪表盘
-                </Link>
-                <Link
-                  to={`/schedule/${studentName}`}
-                  className="px-3 py-2 rounded-lg text-sm md:text-base font-semibold text-gray-700 hover:text-magic-primary hover:bg-magic-primary/10 transition-all"
-                >
-                  📚 课程表
-                </Link>
-                <Link
-                  to={`/achievements/${studentName}`}
-                  className="px-3 py-2 rounded-lg text-sm md:text-base font-semibold text-gray-700 hover:text-magic-primary hover:bg-magic-primary/10 transition-all"
-                >
-                  🏆 成就墙
-                </Link>
-                <Link
-                  to={`/homework/${studentName}`}
-                  className="px-3 py-2 rounded-lg text-sm md:text-base font-semibold text-gray-700 hover:text-magic-primary hover:bg-magic-primary/10 transition-all"
-                >
-                  📝 作业
-                </Link>
-              </div>
-            </div>
+    <Layout className="main-layout">
+      <Header className="app-header">
+        <div className="header-content">
+          <div className="logo">
+            <span className="logo-icon">⚡</span>
+            <span className="logo-text">魔法学校</span>
           </div>
-        </nav>
 
-        {/* 路由 */}
+          <Menu
+            mode="horizontal"
+            theme="light"
+            items={getMenuItems()}
+            className="nav-menu"
+            selectedKeys={[]}
+          />
+
+          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+            <div className="user-info">
+              <Avatar icon={<UserOutlined />} />
+              <span className="username">
+                {user?.role === 'parent' ? '家长' : '小巫师'}
+              </span>
+            </div>
+          </Dropdown>
+        </div>
+      </Header>
+
+      <Content className="app-content">{children}</Content>
+
+      <Footer className="app-footer">
+        <p>⚡ 魔法学校学习管理系统 · 让学习充满魔法</p>
+        <p className="footer-text">© 2025 Magic School. All rights reserved.</p>
+      </Footer>
+    </Layout>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
         <Routes>
-          <Route path="/dashboard/:studentName" element={<Dashboard />} />
-          <Route path="/schedule/:studentName" element={<SchedulePage />} />
-          <Route path="/achievements/:studentName" element={<AchievementsPage />} />
-          <Route path="/homework/:studentName" element={<HomeworkPage />} />
+          {/* 公开路由 */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+
+          {/* 受保护路由 - 需要认证 */}
           <Route
             path="/"
-            element={<Dashboard />}
+            element={
+              <PrivateRoute>
+                <Navigate to="/dashboard" replace />
+              </PrivateRoute>
+            }
+          />
+
+          {/* 学生路由 */}
+          <Route
+            path="/dashboard/*"
+            element={
+              <PrivateRoute allowedRoles={['student']}>
+                <MainLayout>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                  </Routes>
+                </MainLayout>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/schedule/*"
+            element={
+              <PrivateRoute allowedRoles={['student']}>
+                <MainLayout>
+                  <Routes>
+                    <Route path="/" element={<SchedulePage />} />
+                  </Routes>
+                </MainLayout>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/achievements/*"
+            element={
+              <PrivateRoute allowedRoles={['student']}>
+                <MainLayout>
+                  <Routes>
+                    <Route path="/" element={<AchievementsPage />} />
+                  </Routes>
+                </MainLayout>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/homework/*"
+            element={
+              <PrivateRoute allowedRoles={['student']}>
+                <MainLayout>
+                  <Routes>
+                    <Route path="/" element={<HomeworkPage />} />
+                  </Routes>
+                </MainLayout>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/memory/*"
+            element={
+              <PrivateRoute>
+                <MainLayout>
+                  <Routes>
+                    <Route path="/" element={<MemoryPage />} />
+                  </Routes>
+                </MainLayout>
+              </PrivateRoute>
+            }
+          />
+
+          {/* 家长路由 */}
+          <Route
+            path="/parent/dashboard/*"
+            element={
+              <PrivateRoute allowedRoles={['parent']}>
+                <MainLayout>
+                  <Routes>
+                    <Route path="/" element={<ParentDashboardPage />} />
+                  </Routes>
+                </MainLayout>
+              </PrivateRoute>
+            }
+          />
+
+          {/* 404 页面 */}
+          <Route
+            path="*"
+            element={
+              <div className="not-found">
+                <h1>404</h1>
+                <p>页面未找到</p>
+                <Link to="/dashboard">返回首页</Link>
+              </div>
+            }
           />
         </Routes>
-
-        {/* 页脚 */}
-        <footer className="bg-white/95 backdrop-blur-sm mt-12 py-8 border-t border-gray-200">
-          <div className="container mx-auto px-4 text-center">
-            <p className="text-gray-600">
-              ⚡ 魔法学校学习管理系统 · 让学习充满魔法
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              © 2025 Magic School. All rights reserved.
-            </p>
-          </div>
-        </footer>
-      </div>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 
