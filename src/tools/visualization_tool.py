@@ -95,19 +95,20 @@ def get_visual_schedule(student_name: str, runtime: ToolRuntime) -> str:
 
 
 @tool
-def get_points_trend(student_name: str, days: int = 30, runtime: ToolRuntime) -> str:
+def get_points_trend(student_name: str, runtime: ToolRuntime, days: int = 30) -> str:
     """获取积分趋势数据（用于前端图表展示）
-    
+
     返回格式化的JSON数据，包含：
     - 日期列表
     - 每日积分
     - 积分来源分布（作业/运动/朗读等）
     - 积分增长曲线
-    
+
     Args:
         student_name: 学生姓名
+        runtime: ToolRuntime 实例
         days: 查询天数（默认30天）
-    
+
     Returns:
         JSON格式的积分趋势数据
     """
