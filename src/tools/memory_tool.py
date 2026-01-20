@@ -36,18 +36,19 @@ def save_conversation_memory(
 ) -> str:
     """
     保存对话摘要到长期记忆
-    
+
     Args:
         conversation: 对话内容（最近的几轮对话）
         runtime: 工具运行时上下文
-    
+
     Returns:
         保存结果
     """
-    ctx = runtime.context
-    user_id = ctx.get("configurable", {}).get("user_id")
-    thread_id = ctx.get("configurable", {}).get("thread_id")
-    
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    user_id = configurable.get("user_id") if configurable and hasattr(configurable, 'get') else None
+    thread_id = configurable.get("thread_id") if configurable and hasattr(configurable, 'get') else None
+
     if not user_id:
         return "错误：未识别用户身份，无法保存记忆"
     
@@ -72,22 +73,29 @@ def save_conversation_memory(
         """
         
         response = llm.invoke(analysis_prompt)
-        
+
         # 解析 LLM 返回的 JSON
         try:
             # 尝试提取 JSON
-            content = response.content
+            content = response.content if hasattr(response, 'content') else str(response)
+
+            # 确保 content 是字符串类型
+            if isinstance(content, list):
+                content = str(content)
+            if not isinstance(content, str):
+                content = str(content)
+
             if "```json" in content:
                 content = content.split("```json")[1].split("```")[0].strip()
             elif "```" in content:
                 content = content.split("```")[1].split("```")[0].strip()
-            
+
             analysis = json.loads(content)
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, AttributeError, IndexError) as e:
             # 如果解析失败，使用默认值
             analysis = {
                 "topic": "一般对话",
-                "summary": conversation[:100],
+                "summary": str(conversation)[:100] if conversation else "",
                 "key_points": [],
                 "emotion": "neutral",
                 "importance": 3
@@ -126,17 +134,18 @@ def retrieve_relevant_memories(
 ) -> str:
     """
     检索相关的长期记忆
-    
+
     Args:
         query: 查询文本
         runtime: 工具运行时上下文
-    
+
     Returns:
         相关记忆内容
     """
-    ctx = runtime.context
-    user_id = ctx.get("configurable", {}).get("user_id")
-    
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    user_id = configurable.get("user_id") if configurable and hasattr(configurable, 'get') else None
+
     if not user_id:
         return "错误：未识别用户身份"
     
@@ -217,8 +226,9 @@ def update_user_profile(
     Returns:
         更新结果
     """
-    ctx = runtime.context
-    user_id = ctx.get("configurable", {}).get("user_id")
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    user_id = configurable.get("user_id") if configurable and hasattr(configurable, 'get') else None
     
     if not user_id:
         return "错误：未识别用户身份"
@@ -302,8 +312,9 @@ def get_user_profile(runtime: ToolRuntime) -> str:
     Returns:
         用户画像信息
     """
-    ctx = runtime.context
-    user_id = ctx.get("configurable", {}).get("user_id")
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    user_id = configurable.get("user_id") if configurable and hasattr(configurable, 'get') else None
     
     if not user_id:
         return "错误：未识别用户身份"
@@ -363,8 +374,9 @@ def update_knowledge_mastery(
     Returns:
         更新结果
     """
-    ctx = runtime.context
-    user_id = ctx.get("configurable", {}).get("user_id")
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    user_id = configurable.get("user_id") if configurable and hasattr(configurable, 'get') else None
     
     if not user_id:
         return "错误：未识别用户身份"
@@ -431,8 +443,9 @@ def get_knowledge_mastery(subject: Optional[str] = None, runtime: ToolRuntime = 
     Returns:
         知识掌握度信息
     """
-    ctx = runtime.context
-    user_id = ctx.get("configurable", {}).get("user_id")
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    user_id = configurable.get("user_id") if configurable and hasattr(configurable, 'get') else None
     
     if not user_id:
         return "错误：未识别用户身份"

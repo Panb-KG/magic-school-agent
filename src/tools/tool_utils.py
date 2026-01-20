@@ -15,29 +15,31 @@ logger = logging.getLogger(__name__)
 def get_current_user_id(runtime: ToolRuntime) -> Optional[str]:
     """
     获取当前用户 ID
-    
+
     Args:
         runtime: 工具运行时上下文
-    
+
     Returns:
         用户 ID，如果未找到返回 None
     """
-    ctx = runtime.context
-    return ctx.get("configurable", {}).get("user_id")
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    return configurable.get("user_id") if configurable and hasattr(configurable, 'get') else None
 
 
 def get_current_user_role(runtime: ToolRuntime) -> Optional[str]:
     """
     获取当前用户角色
-    
+
     Args:
         runtime: 工具运行时上下文
-    
+
     Returns:
         用户角色 ('student' 或 'parent')，如果未找到返回 None
     """
-    ctx = runtime.context
-    return ctx.get("configurable", {}).get("user_role")
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    return configurable.get("user_role") if configurable and hasattr(configurable, 'get') else None
 
 
 def get_target_student_id(runtime: ToolRuntime, student_name: Optional[str] = None) -> Optional[str]:

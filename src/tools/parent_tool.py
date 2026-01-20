@@ -16,16 +16,17 @@ logger = logging.getLogger(__name__)
 
 def _check_parent_access(runtime: ToolRuntime, student_id: str) -> bool:
     """检查家长是否有权访问该学生"""
-    ctx = runtime.context
-    user_id = ctx.get("configurable", {}).get("user_id")
-    user_role = ctx.get("configurable", {}).get("user_role")
-    
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    user_id = configurable.get("user_id") if configurable and hasattr(configurable, 'get') else None
+    user_role = configurable.get("user_role") if configurable and hasattr(configurable, 'get') else None
+
     if not user_id or not user_role:
         return False
-    
+
     if user_role != 'parent':
         return False
-    
+
     return check_student_access(user_id, user_role, student_id)
 
 
@@ -40,10 +41,11 @@ def parent_view_student_list(runtime: ToolRuntime) -> str:
     Returns:
         学生列表信息
     """
-    ctx = runtime.context
-    user_id = ctx.get("configurable", {}).get("user_id")
-    user_role = ctx.get("configurable", {}).get("user_role")
-    
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    user_id = configurable.get("user_id") if configurable and hasattr(configurable, 'get') else None
+    user_role = configurable.get("user_role") if configurable and hasattr(configurable, 'get') else None
+
     if user_role != 'parent':
         return "错误：此功能仅家长可用"
     
@@ -317,8 +319,9 @@ def parent_approve_homework(
     Returns:
         审核结果
     """
-    ctx = runtime.context
-    parent_id = ctx.get("configurable", {}).get("user_id")
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    parent_id = configurable.get("user_id") if configurable and hasattr(configurable, 'get') else None
     
     if not _check_parent_access(runtime, student_id):
         return "错误：无权审核该学生的作业"
@@ -462,10 +465,11 @@ def parent_link_student(
     Returns:
         关联结果
     """
-    ctx = runtime.context
-    parent_id = ctx.get("configurable", {}).get("user_id")
-    user_role = ctx.get("configurable", {}).get("user_role")
-    
+    ctx = runtime.context if runtime else None
+    configurable = ctx.get("configurable") if ctx and hasattr(ctx, 'get') else None
+    parent_id = configurable.get("user_id") if configurable and hasattr(configurable, 'get') else None
+    user_role = configurable.get("user_role") if configurable and hasattr(configurable, 'get') else None
+
     if user_role != 'parent':
         return "错误：此功能仅家长可用"
     
