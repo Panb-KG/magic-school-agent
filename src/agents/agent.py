@@ -134,9 +134,21 @@ def build_agent(ctx=None):
         parent_view_student_dashboard,
         parent_link_student
     )
-    
+    from tools.time_tool import (
+        get_current_time,
+        get_week_date_range,
+        get_date_after,
+        get_today_info
+    )
+
     # 基础工具列表
     tools = [
+        # 时间工具（放在最前面，确保优先调用）
+        get_current_time,
+        get_week_date_range,
+        get_date_after,
+        get_today_info,
+
         # 学生管理工具
         create_student,
         get_student_info,
