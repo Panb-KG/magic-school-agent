@@ -1,11 +1,27 @@
-from typing import Dict, Any
+from typing import Dict, Any, List, Optional
 from langchain.tools import tool, ToolRuntime
 from storage.database.db import get_session
 from storage.database.student_manager import StudentManager
 from storage.database.homework_manager import HomeworkManager
 from storage.database.exercise_manager import ExerciseManager
 from storage.database.achievement_manager import AchievementManager
+from storage.database.shared.model import Homework
 from datetime import datetime, timedelta
+
+
+def _safe_datetime(dt: Optional[datetime]) -> Optional[datetime]:
+    """安全地获取 datetime 对象，避免类型检查器错误"""
+    if dt is None:
+        return None
+    # 确保 dt 是一个 datetime 对象
+    if isinstance(dt, datetime):
+        return dt
+    return None
+
+
+def _safe_str(value: Any) -> str:
+    """安全地转换为字符串"""
+    return str(value) if value is not None else ""
 
 
 @tool
@@ -51,14 +67,14 @@ def get_student_dashboard(student_name: str, runtime: ToolRuntime) -> str:
         # 2. 统计数据
         # 作业统计
         homework_mgr = HomeworkManager()
-        all_homeworks = homework_mgr.get_student_homeworks(db, student.id)
-        completed_homeworks = [hw for hw in all_homeworks if hw.status == "completed"]
+        all_homeworks: List[Homework] = homework_mgr.get_student_homeworks(db, student.id)
+        completed_homeworks = [hw for hw in all_homeworks if str(hw.status) == "completed"]
         pending_homeworks = homework_mgr.get_pending_homeworks(db, student.id)
         
         # 运动统计
         exercise_mgr = ExerciseManager()
         exercises = exercise_mgr.get_student_exercises(db, student.id)
-        total_exercise_duration = sum(ex.duration or 0 for ex in exercises)
+        total_exercise_duration: int = sum(ex.duration or 0 for ex in exercises)
         
         # 成就统计
         achievement_mgr = AchievementManager()
@@ -80,15 +96,17 @@ def get_student_dashboard(student_name: str, runtime: ToolRuntime) -> str:
         # 3. 最近成就（最近5个）
         recent_achievements = []
         for ach in achievements[:5]:
+            ach_date = _safe_datetime(ach.achieved_date)
+            date_str = ach_date.strftime("%Y-%m-%d") if ach_date else ""
             recent_achievements.append({
                 "id": ach.id,
                 "title": ach.title,
                 "description": ach.description,
-                "type": ach.achievement_type,
+                "type": _safe_str(ach.achievement_type),
                 "points": ach.points or 0,
-                "level": ach.level or "bronze",
+                "level": _safe_str(ach.level or "bronze"),
                 "icon_url": ach.icon_url or "",
-                "achieved_date": ach.achieved_date.strftime("%Y-%m-%d") if ach.achieved_date else ""
+                "achieved_date": date_str
             })
         
         # 4. 待办事项
@@ -96,19 +114,20 @@ def get_student_dashboard(student_name: str, runtime: ToolRuntime) -> str:
         upcoming_deadline = datetime.now() + timedelta(days=7)
         urgent_homeworks = [
             hw for hw in pending_homeworks
-            if hw.due_date and hw.due_date <= upcoming_deadline
+            if _safe_datetime(hw.due_date) and _safe_datetime(hw.due_date) <= upcoming_deadline
         ]
-        urgent_homeworks.sort(key=lambda x: x.due_date)
+        urgent_homeworks.sort(key=lambda x: _safe_datetime(x.due_date) or datetime.min)
         
         todos = []
         for hw in urgent_homeworks[:5]:
-            days_left = (hw.due_date - datetime.now()).days if hw.due_date else None
+            hw_due_date = _safe_datetime(hw.due_date)
+            days_left = (hw_due_date - datetime.now()).days if hw_due_date else None
             urgency = "high" if days_left and days_left <= 1 else "medium"
             todos.append({
                 "id": hw.id,
                 "title": hw.title,
-                "subject": hw.subject or "未指定",
-                "due_date": hw.due_date.strftime("%Y-%m-%d") if hw.due_date else "",
+                "subject": _safe_str(hw.subject) or "未指定",
+                "due_date": hw_due_date.strftime("%Y-%m-%d") if hw_due_date else "",
                 "days_left": days_left,
                 "urgency": urgency,
                 "type": "homework"
@@ -146,14 +165,16 @@ def get_student_dashboard(student_name: str, runtime: ToolRuntime) -> str:
         }
         
         for ach in achievements:
-            if ach.achieved_date and ach.achieved_date >= week_ago:
+            ach_date = _safe_datetime(ach.achieved_date)
+            if ach_date and ach_date >= week_ago:
                 points = ach.points or 0
                 week_points += points
-                if "homework" in ach.achievement_type:
+                ach_type = _safe_str(ach.achievement_type)
+                if "homework" in ach_type:
                     week_points_detail["homework"] += points
-                elif "exercise" in ach.achievement_type:
+                elif "exercise" in ach_type:
                     week_points_detail["exercise"] += points
-                elif "reading" in ach.achievement_type:
+                elif "reading" in ach_type:
                     week_points_detail["reading"] += points
                 else:
                     week_points_detail["other"] += points

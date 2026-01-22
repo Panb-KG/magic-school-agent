@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from langchain.tools import tool, ToolRuntime
 from storage.database.db import get_session
 from storage.database.student_manager import StudentManager
@@ -7,6 +7,20 @@ from storage.database.homework_manager import HomeworkManager
 from storage.database.exercise_manager import ExerciseManager
 from storage.database.achievement_manager import AchievementManager
 from datetime import datetime, timedelta, date
+
+
+def _safe_datetime(dt: Optional[datetime]) -> Optional[datetime]:
+    """安全地获取 datetime 对象，避免类型检查器错误"""
+    if dt is None:
+        return None
+    if isinstance(dt, datetime):
+        return dt
+    return None
+
+
+def _safe_str(value: Any) -> str:
+    """安全地转换为字符串"""
+    return str(value) if value is not None else ""
 
 
 @tool
@@ -63,8 +77,8 @@ def get_visual_schedule(student_name: str, runtime: ToolRuntime) -> str:
             courses_by_day[day].sort(key=lambda x: x["time"])
         
         # 统计数据
-        school_courses = [c for c in courses if c.course_type == "school"]
-        extra_courses = [c for c in courses if c.course_type == "extra"]
+        school_courses = [c for c in courses if _safe_str(c.course_type) == "school"]
+        extra_courses = [c for c in courses if _safe_str(c.course_type) == "extra"]
         
         # 统计每周总课时
         total_hours = sum([
@@ -143,16 +157,17 @@ def get_points_trend(student_name: str, runtime: ToolRuntime, days: int = 30) ->
         }
         
         for ach in achievements:
-            if ach.achieved_date:
-                ach_date = ach.achieved_date.date()
-                date_str = ach_date.strftime("%Y-%m-%d")
+            ach_date = _safe_datetime(ach.achieved_date)
+            if ach_date:
+                date_str = ach_date.date().strftime("%Y-%m-%d")
                 
                 if date_str in points_by_date:
                     points = ach.points or 0
                     points_by_date[date_str] += points
                     
                     # 分类统计
-                    if "homework" in ach.achievement_type:
+                    ach_type = _safe_str(ach.achievement_type)
+                    if "homework" in ach_type:
                         points_breakdown["homework"] += points
                     elif "exercise" in ach.achievement_type:
                         points_breakdown["exercise"] += points
@@ -229,7 +244,7 @@ def get_achievement_wall_data(student_name: str, runtime: ToolRuntime) -> str:
         # 按类型分类
         achievements_by_type = {}
         for ach in achievements:
-            atype = ach.achievement_type or "other"
+            atype = _safe_str(ach.achievement_type) or "other"
             if atype not in achievements_by_type:
                 achievements_by_type[atype] = []
             achievements_by_type[atype].append({
@@ -237,9 +252,9 @@ def get_achievement_wall_data(student_name: str, runtime: ToolRuntime) -> str:
                 "title": ach.title,
                 "description": ach.description,
                 "points": ach.points or 0,
-                "level": ach.level or "bronze",
+                "level": _safe_str(ach.level or "bronze"),
                 "icon_url": ach.icon_url or "",
-                "achieved_date": ach.achieved_date.strftime("%Y-%m-%d") if ach.achieved_date else ""
+                "achieved_date": _safe_datetime(ach.achieved_date).strftime("%Y-%m-%d") if _safe_datetime(ach.achieved_date) else ""
             })
         
         # 按等级分类
@@ -251,15 +266,16 @@ def get_achievement_wall_data(student_name: str, runtime: ToolRuntime) -> str:
             "diamond": []
         }
         for ach in achievements:
-            level = ach.level or "bronze"
+            level = _safe_str(ach.level) or "bronze"
             if level in achievements_by_level:
                 achievements_by_level[level].append({
                     "id": ach.id,
                     "title": ach.title,
                     "description": ach.description,
                     "points": ach.points or 0,
+                    "level": level,
                     "icon_url": ach.icon_url or "",
-                    "achieved_date": ach.achieved_date.strftime("%Y-%m-%d") if ach.achieved_date else ""
+                    "achieved_date": _safe_datetime(ach.achieved_date).strftime("%Y-%m-%d") if _safe_datetime(ach.achieved_date) else ""
                 })
         
         # 成就列表（最近10个）
@@ -269,11 +285,11 @@ def get_achievement_wall_data(student_name: str, runtime: ToolRuntime) -> str:
                 "id": ach.id,
                 "title": ach.title,
                 "description": ach.description,
-                "type": ach.achievement_type or "",
+                "type": _safe_str(ach.achievement_type),
                 "points": ach.points or 0,
-                "level": ach.level or "bronze",
+                "level": _safe_str(ach.level) or "bronze",
                 "icon_url": ach.icon_url or "",
-                "achieved_date": ach.achieved_date.strftime("%Y-%m-%d") if ach.achieved_date else ""
+                "achieved_date": _safe_datetime(ach.achieved_date).strftime("%Y-%m-%d") if _safe_datetime(ach.achieved_date) else ""
             })
         
         import json
@@ -339,23 +355,24 @@ def get_homework_progress(student_name: str, runtime: ToolRuntime) -> str:
         week_ago = datetime.now() - timedelta(days=7)
         week_homeworks = [
             hw for hw in all_homeworks
-            if hw.created_at and hw.created_at >= week_ago
+            if _safe_datetime(hw.created_at) and _safe_datetime(hw.created_at) >= week_ago
         ]
-        week_completed = [hw for hw in week_homeworks if hw.status == "completed"]
+        week_completed = [hw for hw in week_homeworks if _safe_str(hw.status) == "completed"]
         
         # 待完成作业详情
         pending_list = []
         for hw in pending_homeworks:
-            days_left = (hw.due_date - datetime.now()).days if hw.due_date else None
+            hw_due_date = _safe_datetime(hw.due_date)
+            days_left = (hw_due_date - datetime.now()).days if hw_due_date else None
             is_urgent = days_left is not None and days_left <= 2
             pending_list.append({
                 "id": hw.id,
                 "title": hw.title,
-                "subject": hw.subject or "未指定",
-                "due_date": hw.due_date.strftime("%Y-%m-%d") if hw.due_date else "",
+                "subject": _safe_str(hw.subject) or "未指定",
+                "due_date": hw_due_date.strftime("%Y-%m-%d") if hw_due_date else "",
                 "days_left": days_left,
                 "is_urgent": is_urgent,
-                "priority": hw.priority or "medium",
+                "priority": _safe_str(hw.priority) or "medium",
                 "description": hw.description or ""
             })
         
@@ -364,11 +381,12 @@ def get_homework_progress(student_name: str, runtime: ToolRuntime) -> str:
         # 已完成作业详情（最近10个）
         completed_list = []
         for hw in completed_homeworks[-10:]:
+            hw_updated_at = _safe_datetime(hw.updated_at)
             completed_list.append({
                 "id": hw.id,
                 "title": hw.title,
-                "subject": hw.subject or "未指定",
-                "completed_date": hw.updated_at.strftime("%Y-%m-%d") if hw.updated_at else "",
+                "subject": _safe_str(hw.subject) or "未指定",
+                "completed_date": hw_updated_at.strftime("%Y-%m-%d") if hw_updated_at else "",
                 "points": hw.points or 0,
                 "feedback": hw.feedback or ""
             })
