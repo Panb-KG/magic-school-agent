@@ -1,0 +1,51 @@
+/**
+ * 魔法课桌智能体 - 聊天页面样式
+ */
+
+.magic-chat-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.magic-chat-page-header {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.page-icon {
+  font-size: 32px;
+  color: #667eea;
+}
+
+.magic-chat-page-content {
+  padding: 24px;
+}
+
+.chat-card {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  .magic-chat-page-content {
+    padding: 12px;
+  }
+
+  .magic-chat-page-header {
+    padding: 0 16px;
+  }
+}
