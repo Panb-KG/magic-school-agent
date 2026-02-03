@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法课桌 - 服务测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+        .links {
+            margin: 30px 0;
+        }
+        .links a {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .links a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .info-box code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .emoji {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji">🎉</div>
+        <h1>魔法课桌 - 服务测试页面</h1>
+
+        <div class="status success">
+            ✅ 前端服务运行正常！
+        </div>
+
+        <div class="status info">
+            🚀 您现在可以通过公网地址访问前端应用
+        </div>
+
+        <div class="links">
+            <a href="/login">🔐 登录页面</a>
+            <a href="/dashboard">📊 学生仪表盘</a>
+        </div>
+
+        <div class="info-box">
+            <h3>📝 测试账号</h3>
+            <p><strong>学生账号</strong>: <code>student</code> / <code>password123</code></p>
+            <p><strong>家长账号</strong>: <code>parent</code> / <code>password123</code></p>
+        </div>
+
+        <div class="info-box">
+            <h3>🌐 访问地址</h3>
+            <p><strong>公网地址</strong>: <code>http://101.126.128.57:5173</code></p>
+            <p><strong>本地地址</strong>: <code>http://localhost:5173</code></p>
+        </div>
+
+        <div class="info-box">
+            <h3>🔌 后端服务</h3>
+            <p><strong>API 后端</strong>: <code>http://101.126.128.57:3000</code></p>
+            <p><strong>智能体后端</strong>: <code>http://101.126.128.57:5000</code></p>
+            <p><strong>WebSocket</strong>: <code>ws://101.126.128.57:8765</code></p>
+        </div>
+
+        <p style="color: #666; margin-top: 30px;">
+            ⚡ 魔法课桌学习助手智能体 · 让学习充满魔法
+        </p>
+    </div>
+</body>
+</html>
