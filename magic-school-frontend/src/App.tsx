@@ -9,7 +9,7 @@ import {
   TrophyOutlined,
   BookOutlined,
   HomeOutlined,
-  BrainOutlined,
+  ExperimentOutlined,
   TeamOutlined,
 } from '@ant-design/icons';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
@@ -61,7 +61,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         },
         {
           key: 'memory',
-          icon: <BrainOutlined />,
+          icon: <ExperimentOutlined />,
           label: <Link to="/memory">记忆中心</Link>,
         },
       ];
@@ -89,7 +89,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         },
         {
           key: 'memory',
-          icon: <BrainOutlined />,
+          icon: <ExperimentOutlined />,
           label: <Link to="/memory">记忆中心</Link>,
         },
       ];
