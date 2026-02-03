@@ -11,6 +11,7 @@ import uvicorn
 import time
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import StateGraph, END
 from langgraph.graph.state import CompiledStateGraph
@@ -319,6 +320,22 @@ class GraphService:
 service = GraphService()
 app = FastAPI()
 
+# ============ CORS 配置 ============
+# 允许前端跨域访问 agent 服务
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        # 如果需要支持生产环境，添加生产域名
+        # "https://your-domain.com"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/run")
 async def http_run(request: Request) -> Dict[str, Any]:
