@@ -1,0 +1,117 @@
+{
+  "name": "魔法课桌学习助手",
+  "description": "面向小学生和家长的魔法风格学习管理智能体",
+  "avatar": "魔法课桌图标",
+  "category": "教育",
+  "tags": ["教育", "学习管理", "小学生", "家长助手"],
+
+  "bot_config": {
+    "persona": "魔法课桌导师",
+    "intro": "用魔法般有趣的方式帮助小学生管理学习、记录运动、收集成就",
+    "greeting": "✨ 欢迎来到魔法课桌！\n\n我是你的专属魔法课桌导师，可以用魔法般有趣的方式帮助你管理学习、记录运动、收集成就！\n\n需要什么帮助呢？🪄"
+  },
+
+  "plugin_config": {
+    "name": "魔法课桌 Agent",
+    "description": "调用魔法课桌智能体后端服务",
+
+    "tools": [
+      {
+        "name": "对话智能体",
+        "description": "与魔法课桌智能体进行对话",
+        "method": "POST",
+        "url": "http://101.126.128.57:5000/run",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "request_body": {
+          "message": "{{message}}",
+          "session_id": "{{session_id}}",
+          "user_id": "{{user_id}}"
+        },
+        "response_parser": {
+          "reply": "{{messages.[?(@.type=='ai')].content.[0]}}"
+        },
+        "input_params": [
+          {
+            "name": "message",
+            "type": "string",
+            "required": true,
+            "description": "用户输入的消息"
+          },
+          {
+            "name": "session_id",
+            "type": "string",
+            "required": true,
+            "description": "会话ID"
+          },
+          {
+            "name": "user_id",
+            "type": "string",
+            "required": true,
+            "description": "用户ID"
+          }
+        ],
+        "output_params": [
+          {
+            "name": "reply",
+            "type": "string",
+            "description": "Agent 的回复"
+          }
+        ]
+      }
+    ]
+  },
+
+  "health_check": {
+    "url": "http://101.126.128.57:5000/health",
+    "expected_response": {
+      "status": "ok"
+    }
+  },
+
+  "deployment_options": {
+    "recommended": "external_api",
+    "options": [
+      {
+        "id": "external_api",
+        "name": "外部 API 集成",
+        "difficulty": "⭐⭐",
+        "time": "5-10 分钟",
+        "description": "使用自定义插件调用阿里云 ECS 上的后端服务",
+        "pros": ["功能完整", "可控性强", "适合生产环境"],
+        "cons": ["需要维护服务器"]
+      },
+      {
+        "id": "coze_native",
+        "name": "扣子平台构建",
+        "difficulty": "⭐",
+        "time": "10-15 分钟",
+        "description": "直接在扣子平台使用 Agent 和数据库构建",
+        "pros": ["无需服务器", "易维护", "快速上线"],
+        "cons": ["功能受限", "需要重新配置"]
+      },
+      {
+        "id": "hybrid",
+        "name": "混合模式",
+        "difficulty": "⭐⭐⭐",
+        "time": "15-30 分钟",
+        "description": "核心逻辑在扣子平台，复杂功能调用外部 API",
+        "pros": ["兼顾性能与成本"],
+        "cons": ["架构复杂"]
+      }
+    ]
+  },
+
+  "maintenance": {
+    "commands": {
+      "check_status": "cd /workspace/projects && ./scripts/manage_agent.sh status",
+      "view_logs": "cd /workspace/projects && ./scripts/manage_agent.sh logs",
+      "restart_service": "cd /workspace/projects && ./scripts/manage_agent.sh restart"
+    },
+    "monitoring": {
+      "log_file": "/var/log/magic-school-agent.log",
+      "app_log": "/app/work/logs/bypass/app.log"
+    }
+  }
+}
