@@ -64,8 +64,10 @@ def build_agent(ctx=None):
     with open(config_path, 'r', encoding='utf-8') as f:
         cfg = json.load(f)
     
-    api_key = os.getenv("COZE_WORKLOAD_IDENTITY_API_KEY")
-    base_url = os.getenv("COZE_INTEGRATION_MODEL_BASE_URL")
+    # 从配置文件读取 API 配置，如果不存在则使用环境变量
+    api_config = cfg.get('api_config', {})
+    api_key = api_config.get('api_key') or os.getenv("COZE_WORKLOAD_IDENTITY_API_KEY")
+    base_url = api_config.get('base_url') or os.getenv("COZE_INTEGRATION_MODEL_BASE_URL")
     
     # 从上下文中获取用户信息
     user_id = None
