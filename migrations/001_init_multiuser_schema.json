@@ -1,0 +1,7 @@
+{
+  "migration_id": "001_init_multiuser_schema",
+  "migration_name": "初始化多用户架构",
+  "version": "1.0.0",
+  "description": "创建 auth 和 memory schema，包括用户表、权限表、会话表、记忆表等",
+  "dependencies": []
+}

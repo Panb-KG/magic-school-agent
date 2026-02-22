@@ -1,0 +1,7 @@
+{
+  "migration_id": "003_link_students_to_users",
+  "migration_name": "关联 students 表到 auth.users",
+  "version": "1.0.0",
+  "description": "为 students 表添加 user_id 字段和外键约束，并将现有数据关联到 auth.users",
+  "dependencies": ["001_init_multiuser_schema", "002_init_business_tables"]
+}

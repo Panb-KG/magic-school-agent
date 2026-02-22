@@ -1,0 +1,7 @@
+{
+  "migration_id": "002_init_business_tables",
+  "migration_name": "初始化业务表",
+  "version": "1.0.0",
+  "description": "创建业务相关的数据表（students, courses, homeworks, coursewares, exercises, achievements）",
+  "dependencies": ["001_init_multiuser_schema"]
+}
