@@ -27,11 +27,14 @@ JWT_EXPIRE_SECONDS=86400
 
 # 阿里云百炼API密钥（必须配置）
 # ⚠️ 请替换为您的实际API Key
+# ⚠️ 环境变量名称应使用 DASHSCOPE_API_KEY，不应以 COZE_ 开头
 # 获取方式: https://bailian.console.aliyun.com/
-COZE_WORKLOAD_IDENTITY_API_KEY=sk-f02e3eb3ddff4251a1aaddac91ccb724
+DASHSCOPE_API_KEY=sk-f02e3eb3ddff4251a1aaddac91ccb724
 
 # 阿里云百炼API地址（必须配置）
-COZE_INTEGRATION_MODEL_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+# ⚠️ 使用 OPENAI_BASE_URL 作为环境变量名称
+# ⚠️ 不应使用 COZE_INTEGRATION_MODEL_BASE_URL
+OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 
 # 使用的模型（可选，默认为 qwen-turbo）
 MODEL_NAME=qwen-turbo
@@ -182,13 +185,33 @@ SHOW_DETAILED_ERRORS=True
 ENABLE_DEBUG_TOOLBAR=False
 
 # ============================================
+# 环境变量命名规范说明
+# ============================================
+
+# ✅ 推荐的环境变量命名
+# DASHSCOPE_API_KEY - 阿里云百炼API密钥（标准命名）
+# OPENAI_BASE_URL - OpenAI兼容接口地址（标准命名）
+# JWT_SECRET - JWT密钥
+# DATABASE_URL - 数据库连接字符串
+
+# ❌ 不推荐的环境变量命名
+# COZE_WORKLOAD_IDENTITY_API_KEY - 不应以COZE_开头
+# COZE_INTEGRATION_MODEL_BASE_URL - 不应以COZE_开头
+
+# 原因：
+# 1. 使用标准的环境变量命名规范，提高兼容性
+# 2. 便于在不同部署平台之间迁移
+# 3. 符合行业最佳实践
+# 4. 避免与特定平台的前缀冲突
+
+# ============================================
 # 注意事项
 # ============================================
 
 # 1. 必须配置的环境变量：
 #    - JWT_SECRET
-#    - COZE_WORKLOAD_IDENTITY_API_KEY
-#    - COZE_INTEGRATION_MODEL_BASE_URL
+#    - DASHSCOPE_API_KEY
+#    - OPENAI_BASE_URL
 #    - PORT（部署到Coze时必须设置为8000）
 
 # 2. 安全建议：
@@ -207,3 +230,8 @@ ENABLE_DEBUG_TOOLBAR=False
 #    - PORT 必须设置为 8000
 #    - HOST 可以设置为 0.0.0.0
 #    - 如果使用Coze提供的数据库，DATABASE_URL 可以不配置
+
+# 5. 环境变量前缀规则：
+#    - 避免使用特定平台的前缀（如 COZE_）
+#    - 使用通用的、标准化的命名
+#    - 优先使用行业通用的环境变量名称

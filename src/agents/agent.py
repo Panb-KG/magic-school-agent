@@ -66,8 +66,20 @@ def build_agent(ctx=None):
     
     # 从配置文件读取 API 配置，如果不存在则使用环境变量
     api_config = cfg.get('api_config', {})
-    api_key = api_config.get('api_key') or os.getenv("COZE_WORKLOAD_IDENTITY_API_KEY")
-    base_url = api_config.get('base_url') or os.getenv("COZE_INTEGRATION_MODEL_BASE_URL")
+    
+    # 支持新旧两种环境变量命名
+    # 新命名（推荐）: DASHSCOPE_API_KEY, OPENAI_BASE_URL
+    # 旧命名（已弃用）: COZE_WORKLOAD_IDENTITY_API_KEY, COZE_INTEGRATION_MODEL_BASE_URL
+    api_key = (
+        api_config.get('api_key') or
+        os.getenv("DASHSCOPE_API_KEY") or
+        os.getenv("COZE_WORKLOAD_IDENTITY_API_KEY")
+    )
+    base_url = (
+        api_config.get('base_url') or
+        os.getenv("OPENAI_BASE_URL") or
+        os.getenv("COZE_INTEGRATION_MODEL_BASE_URL")
+    )
     
     # 从上下文中获取用户信息
     user_id = None
