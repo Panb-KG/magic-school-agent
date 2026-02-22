@@ -341,9 +341,9 @@ def delete_homework(
             return "错误：无权删除该作业"
         
         # 删除作业
-        success = homework_mgr.delete_homework(db, homework_id)
+        deleted_count = homework_mgr.delete_homeworks(db, id=homework_id)
         
-        if success:
+        if deleted_count > 0:
             return f"成功删除作业（ID: {homework_id}）"
         else:
             return f"删除作业失败"
@@ -389,9 +389,12 @@ def verify_and_submit_homework(
         # 查找待提交的作业
         pending_homeworks = homework_mgr.get_pending_homeworks(db, student_id)
         target_homework = None
-        
+
+        from storage.database.shared.model import Homework
         for hw in pending_homeworks:
-            if hw.title == homework_title:
+            # 使用 getattr 确保获取实际值而不是 ColumnExpression
+            title_value = getattr(hw, 'title', '')
+            if title_value == homework_title:
                 target_homework = hw
                 break
         
