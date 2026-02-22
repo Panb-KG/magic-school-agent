@@ -55,35 +55,46 @@ pip install -r requirements.txt
 # 3. 安装前端依赖
 cd magic-school-frontend
 npm install
+cd ..
 
 # 4. 配置环境变量
-cp .env.example .env
-# 编辑 .env 文件，填入必要的配置
+# 创建 .env 文件（参考 docs/生产环境变量配置模板.txt）
+# 必须配置: JWT_SECRET, COZE_WORKLOAD_IDENTITY_API_KEY, COZE_INTEGRATION_MODEL_BASE_URL
 
 # 5. 初始化数据库
-cd ..
-python scripts/init_db.py
+python scripts/init_database.py
 ```
 
 ### 启动服务
 
 ```bash
-# 1. 启动API后端（端口3000）
-python scripts/mock_api_server.py
+# 方式1: 使用一键启动脚本（推荐）
+./scripts/start_all_services.sh
 
-# 2. 启动Agent服务（端口5000）
-python src/main.py -m http -p 5000
+# 方式2: 手动启动
 
-# 3. 启动前端服务（端口5173）
+# 1. 启动API后端（端口8000）
+uvicorn src.main:app --reload --port 8000
+
+# 2. 启动前端服务（端口5173）
 cd magic-school-frontend
 npm run dev
 ```
 
 ### 访问应用
 
-- 前端: http://localhost:5173
-- API文档: http://localhost:3000/docs
-- Agent文档: http://localhost:5000/docs
+- **前端**: http://localhost:5173
+- **API文档**: http://localhost:8000/docs
+- **WebSocket**: ws://localhost:8000/ws/chat
+
+### 🚀 生产部署
+
+如果您想部署到生产环境，推荐使用 **扣子平台部署**：
+
+- [扣子平台部署指南](docs/扣子编程项目部署实际操作指南.md) - 详细步骤
+- [快速参考卡](docs/扣子平台部署快速参考卡.md) - 5分钟完成部署
+
+或参考 [部署指南](DEPLOYMENT_GUIDE.md) 进行手动部署。
 
 ### 测试账号
 
@@ -151,10 +162,34 @@ FRONTEND_PORT=5173
 
 ## 📖 文档
 
-- [API文档](docs/后端API完整文档-Figma设计用.md)
-- [部署指南](docs/快速部署指南.md)
-- [开发指南](docs/魔法课桌智能体部署方案分析.md)
-- [前端调用指南](docs/前端调用魔法课桌智能体指南.md)
+### 用户文档
+- [README](README.md) - 项目概述
+- [快速开始](QUICK_START.md) - 5分钟快速入门
+- [项目概览](OVERVIEW.txt) - 项目快速参考
+
+### 部署文档
+- [扣子平台部署指南](docs/扣子编程项目部署实际操作指南.md) - Coze平台部署详解 ⭐
+- [扣子平台部署快速参考卡](docs/扣子平台部署快速参考卡.md) - 部署快速参考 ⭐
+- [环境变量配置模板](docs/生产环境变量配置模板.txt) - 生产环境配置模板
+- [部署指南](DEPLOYMENT_GUIDE.md) - 通用部署指南
+
+### API文档
+- [API完整文档](API_DOCUMENTATION.md) - REST API接口文档
+- [后端API文档](docs/后端API完整文档-Figma设计用.md) - 后端API详解
+- [前端调用指南](docs/前端调用魔法课桌智能体指南.md) - 前端集成指南
+
+### 开发文档
+- [开发指南](DEVELOPMENT_GUIDE.md) - 开发者指南
+- [项目结构](PROJECT_STRUCTURE.md) - 项目结构说明
+- [架构设计](ARCHITECTURE.md) - 系统架构
+- [魔法课桌部署方案](docs/魔法课桌智能体部署方案分析.md) - 部署方案分析
+
+### 发布文档
+- [发布清单](RELEASE_CHECKLIST.md) - 发布前检查清单
+- [发布说明](RELEASE_NOTES.md) - 版本发布说明
+- [交付清单](PROJECT_DELIVERY_CHECKLIST.md) - 项目交付清单
+- [状态报告](PROJECT_STATUS_REPORT.md) - 项目状态报告
+- [开发历程](PROJECT_JOURNEY.md) - 项目开发历程
 
 ## 🛠️ 技术栈
 
@@ -193,7 +228,23 @@ bash scripts/test_services.sh
 
 ## 📦 部署
 
-### Docker部署
+### 方式1: 扣子平台部署（推荐）⭐
+
+最简单快捷的部署方式，一键部署到Coze平台。
+
+**步骤**：
+1. 查看 [扣子平台部署指南](docs/扣子编程项目部署实际操作指南.md)
+2. 使用 [快速参考卡](docs/扣子平台部署快速参考卡.md) 快速配置
+3. 配置环境变量（见 [环境变量模板](docs/生产环境变量配置模板.txt)）
+4. 点击部署，3-5分钟即可完成
+
+**优势**：
+- ✅ 无需服务器
+- ✅ 自动域名
+- ✅ 一键部署
+- ✅ 自动扩展
+
+### 方式2: Docker部署
 
 ```bash
 # 构建镜像
@@ -203,9 +254,15 @@ docker-compose build
 docker-compose up -d
 ```
 
-### 手动部署
+### 方式3: 手动部署
 
-详见 [快速部署指南](docs/快速部署指南.md)
+详见 [部署指南](DEPLOYMENT_GUIDE.md)
+
+**环境要求**：
+- Python 3.8+
+- Node.js 18+
+- PostgreSQL 13+
+- Redis 6+ (可选)
 
 ## 🤝 贡献
 
