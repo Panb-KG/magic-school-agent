@@ -21,6 +21,7 @@ def get_storage():
 
 
 @tool
+@require_student_access()
 def upload_homework_attachment(
     file_content: bytes,
     file_name: str,
@@ -50,6 +51,7 @@ def upload_homework_attachment(
 
 
 @tool
+@require_student_access()
 def upload_homework_submission(
     file_content: bytes,
     file_name: str,
@@ -78,6 +80,7 @@ def upload_homework_submission(
 
 
 @tool
+@require_student_access()
 def upload_courseware(
     file_content: bytes,
     file_name: str,
@@ -108,6 +111,7 @@ def upload_courseware(
 
 
 @tool
+@require_student_access()
 def upload_achievement_icon(
     file_content: bytes,
     file_name: str,
@@ -190,6 +194,7 @@ def delete_file(
 
 
 @tool
+@require_student_access()
 def list_student_files(
     student_id: int,
     file_type: str,
