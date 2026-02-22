@@ -22,7 +22,28 @@ def create_student(
     """创建学生信息
     
     Args:
-        student_id: 学生ID}（ID: {student.id}）"
+        name: 学生姓名
+        grade: 年级
+        class_name: 班级
+        school: 学校
+        parent_contact: 家长联系方式
+        nickname: 昵称
+    
+    Returns:
+        创建的学生信息
+    """
+    db = get_session()
+    try:
+        mgr = StudentManager()
+        student = mgr.create_student(db, StudentCreate(
+            name=name,
+            grade=grade,
+            class_name=class_name,
+            school=school,
+            parent_contact=parent_contact,
+            nickname=nickname
+        ))
+        return f"成功创建学生：{student.name}（ID: {student.id}）"
     except Exception as e:
         return f"创建学生失败：{str(e)}"
     finally:
@@ -32,16 +53,23 @@ def create_student(
 @tool
 @require_student_access()
 def get_student_info(
-        student_id: int, runtime: ToolRuntime) -> str:
-    """
-    # 权限检查
-    if not check_student_access(runtime, student_id):
-        return "错误：无权访问该学生的数据"
-    
-    获取学生信息
+    student_id: int,
+    runtime: ToolRuntime = None
+) -> str:
+    """获取学生信息
     
     Args:
-        student_id: 学生ID}的学生"
+        student_id: 学生ID
+    
+    Returns:
+        学生详细信息
+    """
+    db = get_session()
+    try:
+        mgr = StudentManager()
+        student = mgr.get_student_by_id(db, student_id)
+        if not student:
+            return f"未找到ID为{student_id}的学生"
         
         info = f"""
 学生信息：
@@ -62,11 +90,29 @@ def get_student_info(
 
 
 @tool
-def add_student_points(name: str, points: int, reason: str, runtime: ToolRuntime) -> str:
+@require_student_access()
+def add_student_points(
+    student_id: int,
+    points: int,
+    reason: str,
+    runtime: ToolRuntime = None
+) -> str:
     """给学生增加积分
     
     Args:
-        student_id: 学生ID}的学生"
+        student_id: 学生ID
+        points: 增加的积分数
+        reason: 原因说明
+    
+    Returns:
+        操作结果
+    """
+    db = get_session()
+    try:
+        mgr = StudentManager()
+        student = mgr.get_student_by_id(db, student_id)
+        if not student:
+            return f"未找到ID为{student_id}的学生"
         
         student = mgr.add_points(db, student.id, points)
         return f"成功给学生{student.name}增加{points}积分，当前总积分：{student.total_points}（原因：{reason}）"
@@ -77,11 +123,25 @@ def add_student_points(name: str, points: int, reason: str, runtime: ToolRuntime
 
 
 @tool
-def upgrade_magic_level(name: str, runtime: ToolRuntime) -> str:
+@require_student_access()
+def upgrade_magic_level(
+    student_id: int,
+    runtime: ToolRuntime = None
+) -> str:
     """升级学生的魔法等级
     
     Args:
-        student_id: 学生ID}的学生"
+        student_id: 学生ID
+    
+    Returns:
+        操作结果
+    """
+    db = get_session()
+    try:
+        mgr = StudentManager()
+        student = mgr.get_student_by_id(db, student_id)
+        if student is None:
+            return f"未找到ID为{student_id}的学生"
 
         # 获取魔法等级
         old_level_value = getattr(student, 'magic_level', None)

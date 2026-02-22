@@ -8,6 +8,12 @@ from coze_coding_utils.runtime_ctx.context import new_context
 from storage.database.db import get_session
 from storage.database.student_manager import StudentManager
 from storage.database.achievement_manager import AchievementManager, AchievementCreate
+from tools.tool_utils_fixed import (
+    get_user_context,
+    check_student_access,
+    require_student_access,
+    get_student_name_by_id
+)
 from datetime import datetime
 
 
@@ -74,8 +80,9 @@ def analyze_errors(original: str, recognized: str) -> Dict:
 
 
 @tool
+@require_student_access()
 def assess_reading(
-    student_name: str,
+    student_id: int,
     original_text: str,
     audio_url: str = None,
     audio_base64: str = None,
@@ -92,7 +99,7 @@ def assess_reading(
     - 详细反馈
     
     Args:
-        student_name: 学生姓名
+        student_id: 学生ID
         original_text: 原文文本（要朗读的内容）
         audio_url: 音频文件URL（可选）
         audio_base64: 音频文件Base64编码（可选，与audio_url二选一）
@@ -101,6 +108,9 @@ def assess_reading(
     Returns:
         评估结果，包括分数、错误分析、反馈建议
     """
+    # 获取学生姓名
+    student_name = get_student_name_by_id(student_id) or f"student_{student_id}"
+    
     # 1. 语音识别
     ctx = new_context(method="voice_assessment.recognize")
     asr_client = ASRClient(ctx=ctx)
@@ -254,8 +264,9 @@ def assess_reading(
 
 
 @tool
+@require_student_access()
 def practice_reading(
-    student_name: str,
+    student_id: int,
     text: str,
     runtime: ToolRuntime = None
 ) -> str:
@@ -264,12 +275,14 @@ def practice_reading(
     生成朗读练习题，支持中英文练习材料
     
     Args:
-        student_name: 学生姓名
+        student_id: 学生ID
         text: 练习文本（可选，不提供则使用默认材料）
     
     Returns:
         练习材料和建议
     """
+    # 获取学生姓名
+    student_name = get_student_name_by_id(student_id) or f"student_{student_id}"
     
     # 如果用户提供了文本，直接使用
     if text and text.strip():

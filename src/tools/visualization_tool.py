@@ -30,7 +30,8 @@ def _safe_str(value: Any) -> str:
 
 
 @tool
-def get_visual_schedule(student_name: str, runtime: ToolRuntime) -> str:
+@require_student_access()
+def get_visual_schedule(student_id: int, runtime: ToolRuntime) -> str:
     """获取可视化课程表数据（用于前端展示）
     
     返回格式化的JSON数据，包含：
@@ -39,7 +40,7 @@ def get_visual_schedule(student_name: str, runtime: ToolRuntime) -> str:
     - 课程类型分布
     
     Args:
-        student_name: 学生姓名
+        student_id: 学生ID
     
     Returns:
         JSON格式的课程表数据
@@ -47,10 +48,10 @@ def get_visual_schedule(student_name: str, runtime: ToolRuntime) -> str:
     db = get_session()
     try:
         student_mgr = StudentManager()
-        student = student_mgr.get_student_by_name(db, student_name)
+        student = student_mgr.get_student_by_id(db, student_id)
         
         if not student:
-            return f'{{"error": "未找到学生 {student_name}"}}'
+            return f'{{"error": "未找到学生 ID {student_id}"}}'
         
         course_mgr = CourseManager()
         courses = course_mgr.get_courses(db, student.id)
@@ -88,11 +89,13 @@ def get_visual_schedule(student_name: str, runtime: ToolRuntime) -> str:
         
         # 统计每周总课时
         total_hours = sum([
-            (len(courses_by_day[day]) for day in weekdays)
+            len(courses_by_day[day]) for day in weekdays
         ])
         
         import json
         schedule_data = {
+            "student_id": student_id,
+            "student_name": get_student_name_by_id(student_id) or "学生",
             "weekdays": weekdays,
             "courses": courses_by_day,
             "statistics": {
@@ -115,7 +118,8 @@ def get_visual_schedule(student_name: str, runtime: ToolRuntime) -> str:
 
 
 @tool
-def get_points_trend(student_name: str, runtime: ToolRuntime, days: int = 30) -> str:
+@require_student_access()
+def get_points_trend(student_id: int, runtime: ToolRuntime, days: int = 30) -> str:
     """获取积分趋势数据（用于前端图表展示）
 
     返回格式化的JSON数据，包含：
@@ -125,8 +129,7 @@ def get_points_trend(student_name: str, runtime: ToolRuntime, days: int = 30) ->
     - 积分增长曲线
 
     Args:
-        student_name: 学生姓名
-        runtime: ToolRuntime 实例
+        student_id: 学生ID
         days: 查询天数（默认30天）
 
     Returns:
@@ -135,10 +138,10 @@ def get_points_trend(student_name: str, runtime: ToolRuntime, days: int = 30) ->
     db = get_session()
     try:
         student_mgr = StudentManager()
-        student = student_mgr.get_student_by_name(db, student_name)
+        student = student_mgr.get_student_by_id(db, student_id)
         
         if not student:
-            return f'{{"error": "未找到学生 {student_name}"}}'
+            return f'{{"error": "未找到学生 ID {student_id}"}}'
         
         achievement_mgr = AchievementManager()
         achievements = achievement_mgr.get_student_achievements(db, student.id)
@@ -175,11 +178,11 @@ def get_points_trend(student_name: str, runtime: ToolRuntime, days: int = 30) ->
                     ach_type = _safe_str(ach.achievement_type)
                     if "homework" in ach_type:
                         points_breakdown["homework"] += points
-                    elif "exercise" in ach.achievement_type:
+                    elif "exercise" in ach_type:
                         points_breakdown["exercise"] += points
-                    elif "reading" in ach.achievement_type:
+                    elif "reading" in ach_type:
                         points_breakdown["reading"] += points
-                    elif "course" in ach.achievement_type:
+                    elif "course" in ach_type:
                         points_breakdown["course_complete"] += points
                     else:
                         points_breakdown["other"] += points
@@ -196,13 +199,15 @@ def get_points_trend(student_name: str, runtime: ToolRuntime, days: int = 30) ->
         
         import json
         trend_data = {
+            "student_id": student_id,
+            "student_name": get_student_name_by_id(student_id) or "学生",
             "date_list": date_list,
             "daily_points": daily_points,
             "cumulative_points": cumulative_points,
             "breakdown": points_breakdown,
             "summary": {
                 "total_points": sum(daily_points),
-                "average_daily": round(sum(daily_points) / days, 1),
+                "average_daily": round(sum(daily_points) / days, 1) if days > 0 else 0,
                 "max_daily": max(daily_points) if daily_points else 0,
                 "days_with_points": sum(1 for p in daily_points if p > 0)
             },
@@ -218,7 +223,8 @@ def get_points_trend(student_name: str, runtime: ToolRuntime, days: int = 30) ->
 
 
 @tool
-def get_achievement_wall_data(student_name: str, runtime: ToolRuntime) -> str:
+@require_student_access()
+def get_achievement_wall_data(student_id: int, runtime: ToolRuntime) -> str:
     """获取成就墙可视化数据（用于前端展示）
     
     返回格式化的JSON数据，包含：
@@ -228,7 +234,7 @@ def get_achievement_wall_data(student_name: str, runtime: ToolRuntime) -> str:
     - 精选成就（用于展示墙）
     
     Args:
-        student_name: 学生姓名
+        student_id: 学生ID
     
     Returns:
         JSON格式的成就墙数据
@@ -236,10 +242,10 @@ def get_achievement_wall_data(student_name: str, runtime: ToolRuntime) -> str:
     db = get_session()
     try:
         student_mgr = StudentManager()
-        student = student_mgr.get_student_by_name(db, student_name)
+        student = student_mgr.get_student_by_id(db, student_id)
         
         if not student:
-            return f'{{"error": "未找到学生 {student_name}"}}'
+            return f'{{"error": "未找到学生 ID {student_id}"}}'
         
         achievement_mgr = AchievementManager()
         achievements = achievement_mgr.get_student_achievements(db, student.id)
@@ -300,6 +306,8 @@ def get_achievement_wall_data(student_name: str, runtime: ToolRuntime) -> str:
         
         import json
         wall_data = {
+            "student_id": student_id,
+            "student_name": get_student_name_by_id(student_id) or "学生",
             "featured": featured_achievements,
             "by_type": achievements_by_type,
             "by_level": achievements_by_level,
@@ -327,7 +335,8 @@ def get_achievement_wall_data(student_name: str, runtime: ToolRuntime) -> str:
 
 
 @tool
-def get_homework_progress(student_name: str, runtime: ToolRuntime) -> str:
+@require_student_access()
+def get_homework_progress(student_id: int, runtime: ToolRuntime) -> str:
     """获取作业进度数据（用于前端可视化）
     
     返回格式化的JSON数据，包含：
@@ -338,7 +347,7 @@ def get_homework_progress(student_name: str, runtime: ToolRuntime) -> str:
     - 本周作业进度
     
     Args:
-        student_name: 学生姓名
+        student_id: 学生ID
     
     Returns:
         JSON格式的作业进度数据
@@ -346,10 +355,10 @@ def get_homework_progress(student_name: str, runtime: ToolRuntime) -> str:
     db = get_session()
     try:
         student_mgr = StudentManager()
-        student = student_mgr.get_student_by_name(db, student_name)
+        student = student_mgr.get_student_by_id(db, student_id)
         
         if not student:
-            return f'{{"error": "未找到学生 {student_name}"}}'
+            return f'{{"error": "未找到学生 ID {student_id}"}}'
         
         homework_mgr = HomeworkManager()
         all_homeworks = homework_mgr.get_student_homeworks(db, student.id)
@@ -400,6 +409,8 @@ def get_homework_progress(student_name: str, runtime: ToolRuntime) -> str:
         
         import json
         progress_data = {
+            "student_id": student_id,
+            "student_name": get_student_name_by_id(student_id) or "学生",
             "statistics": {
                 "total": len(all_homeworks),
                 "completed": len(completed_homeworks),
