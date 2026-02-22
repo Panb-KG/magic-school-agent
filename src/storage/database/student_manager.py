@@ -35,7 +35,9 @@ class StudentManager:
 
     def create_student(self, db: Session, student_in: StudentCreate) -> Student:
         """创建学生"""
-        student_data = student_in.model_dump()
+        student_data = student_in.model_dump(exclude_unset=True)
+        # 移除 user_id 字段，因为数据库表中不存在
+        student_data.pop('user_id', None)
         student = Student(**student_data)
         db.add(student)
         try:
