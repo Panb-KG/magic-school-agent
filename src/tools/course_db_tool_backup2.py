@@ -1,18 +1,11 @@
 from langchain.tools import tool, ToolRuntime
-from tools.tool_utils_fixed import (
-    get_user_context,
-    check_student_access,
-    require_student_access,
-    get_student_name_by_id
-)
 from storage.database.db import get_session
 from storage.database.course_manager import CourseManager, CourseCreate, CourseUpdate
 
 
 @tool
-@require_student_access()
 def add_course(
-    student_id: int,
+    student_name: str,
     course_name: str,
     course_type: str,
     weekday: str,
@@ -26,7 +19,7 @@ def add_course(
     """添加课程到课程表
     
     Args:
-        student_id: 学生ID
+        student_name: 学生姓名
         course_name: 课程名称
         course_type: 课程类型（school/extra）
         weekday: 星期几（Monday/Tuesday/Wednesday/Thursday/Friday/Saturday/Sunday）
@@ -39,16 +32,14 @@ def add_course(
     Returns:
         操作结果
     """
-    # 权限检查（由装饰器自动完成）
-    
     db = get_session()
     try:
         from storage.database.student_manager import StudentManager
         student_mgr = StudentManager()
-        student = student_mgr.get_student_by_id(db, student_id)
+        student = student_mgr.get_student_by_name(db, student_name)
         
         if not student:
-            return f"未找到ID为{student_id}的学生"
+            return f"未找到姓名为{student_name}的学生"
         
         course_mgr = CourseManager()
         course = course_mgr.create_course(db, CourseCreate(
@@ -62,9 +53,7 @@ def add_course(
             teacher=teacher,
             classroom=classroom
         ))
-        
-        student_name = student.name or "学生"
-        return f"成功为{student_name}添加课程：{course_name}（{weekday} {start_time}-{end_time}）"
+        return f"成功添加课程：{course_name}（{weekday} {start_time}-{end_time}）"
     except Exception as e:
         return f"添加课程失败：{str(e)}"
     finally:
@@ -72,34 +61,27 @@ def add_course(
 
 
 @tool
-@require_student_access()
-def get_weekly_schedule(
-    student_id: int,
-    runtime: ToolRuntime
-) -> str:
+def get_weekly_schedule(student_name: str, runtime: ToolRuntime) -> str:
     """获取学生的周课程表
     
     Args:
-        student_id: 学生ID
+        student_name: 学生姓名
     
     Returns:
         周课程表
     """
-    # 权限检查（由装饰器自动完成）
-    
     db = get_session()
     try:
         from storage.database.student_manager import StudentManager
         student_mgr = StudentManager()
-        student = student_mgr.get_student_by_id(db, student_id)
+        student = student_mgr.get_student_by_name(db, student_name)
         
         if not student:
-            return f"未找到ID为{student_id}的学生"
+            return f"未找到姓名为{student_name}的学生"
         
         course_mgr = CourseManager()
         schedule = course_mgr.get_weekly_schedule(db, student.id)
         
-        student_name = student.name or "学生"
         result = f"{student_name}的周课程表：\n\n"
         for day, courses in schedule.items():
             if courses:
@@ -138,22 +120,9 @@ def update_course(
     Returns:
         操作结果
     """
-    # 需要先获取课程以进行权限检查
     db = get_session()
     try:
-        from storage.database.course_manager import CourseManager
         course_mgr = CourseManager()
-        
-        # 获取课程
-        course = course_mgr.get_course_by_id(db, course_id)
-        if not course:
-            return f"未找到ID为{course_id}的课程"
-        
-        # 权限检查
-        if not check_student_access(runtime, course.student_id):
-            return "错误：无权修改该课程"
-        
-        # 更新课程
         course = course_mgr.update_course(db, course_id, CourseUpdate(
             course_name=course_name,
             weekday=weekday,
@@ -172,10 +141,7 @@ def update_course(
 
 
 @tool
-def delete_course(
-    course_id: int,
-    runtime: ToolRuntime
-) -> str:
+def delete_course(course_id: int, runtime: ToolRuntime) -> str:
     """删除课程
     
     Args:
@@ -184,22 +150,9 @@ def delete_course(
     Returns:
         操作结果
     """
-    # 需要先获取课程以进行权限检查
     db = get_session()
     try:
-        from storage.database.course_manager import CourseManager
         course_mgr = CourseManager()
-        
-        # 获取课程
-        course = course_mgr.get_course_by_id(db, course_id)
-        if not course:
-            return f"未找到ID为{course_id}的课程"
-        
-        # 权限检查
-        if not check_student_access(runtime, course.student_id):
-            return "错误：无权删除该课程"
-        
-        # 删除课程
         deleted_count = course_mgr.delete_courses(db, id=course_id)
         
         if deleted_count > 0:

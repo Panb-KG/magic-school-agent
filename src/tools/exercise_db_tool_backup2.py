@@ -1,19 +1,12 @@
 from langchain.tools import tool, ToolRuntime
-from tools.tool_utils_fixed import (
-    get_user_context,
-    check_student_access,
-    require_student_access,
-    get_student_name_by_id
-)
 from storage.database.db import get_session
 from storage.database.exercise_manager import ExerciseManager, ExerciseCreate, ExerciseUpdate
 from datetime import datetime
 
 
 @tool
-@require_student_access()
 def add_exercise(
-        student_id: int,
+    student_name: str,
     exercise_type: str,
     duration: int,
     distance: float,
@@ -21,15 +14,27 @@ def add_exercise(
     notes: str,
     runtime: ToolRuntime
 ) -> str:
-    """
-    # 权限检查
-    if not check_student_access(runtime, student_id):
-        return "错误：无权访问该学生的数据"
-    
-    添加运动记录
+    """添加运动记录
     
     Args:
-        student_id: 学生ID}的学生"
+        student_name: 学生姓名
+        exercise_type: 运动类型（run/swim/basketball/football/skip_rope/yoga/other）
+        duration: 时长（分钟）
+        distance: 距离（公里）
+        calories: 消耗卡路里
+        notes: 备注
+    
+    Returns:
+        操作结果
+    """
+    db = get_session()
+    try:
+        from storage.database.student_manager import StudentManager
+        student_mgr = StudentManager()
+        student = student_mgr.get_student_by_name(db, student_name)
+        
+        if not student:
+            return f"未找到姓名为{student_name}的学生"
         
         # 计算积分：每分钟运动给1分
         points = duration // 10
@@ -56,17 +61,24 @@ def add_exercise(
 
 
 @tool
-def get_exercise_list(
-        student_id: int, exercise_type: str, runtime: ToolRuntime) -> str:
-    """
-    # 权限检查
-    if not check_student_access(runtime, student_id):
-        return "错误：无权访问该学生的数据"
-    
-    获取学生的运动记录列表
+def get_exercise_list(student_name: str, exercise_type: str, runtime: ToolRuntime) -> str:
+    """获取学生的运动记录列表
     
     Args:
-        student_id: 学生ID}的学生"
+        student_name: 学生姓名
+        exercise_type: 运动类型筛选（可选）
+    
+    Returns:
+        运动记录列表
+    """
+    db = get_session()
+    try:
+        from storage.database.student_manager import StudentManager
+        student_mgr = StudentManager()
+        student = student_mgr.get_student_by_name(db, student_name)
+        
+        if not student:
+            return f"未找到姓名为{student_name}的学生"
         
         exercise_mgr = ExerciseManager()
         exercises = exercise_mgr.get_student_exercises(db, student.id, exercise_type=exercise_type if exercise_type else None)
@@ -100,17 +112,23 @@ def get_exercise_list(
 
 
 @tool
-def get_weekly_exercise_stats(
-        student_id: int, runtime: ToolRuntime) -> str:
-    """
-    # 权限检查
-    if not check_student_access(runtime, student_id):
-        return "错误：无权访问该学生的数据"
-    
-    获取本周运动统计
+def get_weekly_exercise_stats(student_name: str, runtime: ToolRuntime) -> str:
+    """获取本周运动统计
     
     Args:
-        student_id: 学生ID}的学生"
+        student_name: 学生姓名
+    
+    Returns:
+        周运动统计数据
+    """
+    db = get_session()
+    try:
+        from storage.database.student_manager import StudentManager
+        student_mgr = StudentManager()
+        student = student_mgr.get_student_by_name(db, student_name)
+        
+        if not student:
+            return f"未找到姓名为{student_name}的学生"
         
         exercise_mgr = ExerciseManager()
         stats = exercise_mgr.get_weekly_exercises(db, student.id)

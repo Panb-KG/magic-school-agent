@@ -1,11 +1,5 @@
 import os
 from langchain.tools import tool, ToolRuntime
-from tools.tool_utils_fixed import (
-    get_user_context,
-    check_student_access,
-    require_student_access,
-    get_student_name_by_id
-)
 from coze_coding_dev_sdk.s3 import S3SyncStorage
 
 

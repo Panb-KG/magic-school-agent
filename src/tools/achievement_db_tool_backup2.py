@@ -1,18 +1,11 @@
 from langchain.tools import tool, ToolRuntime
-from tools.tool_utils_fixed import (
-    get_user_context,
-    check_student_access,
-    require_student_access,
-    get_student_name_by_id
-)
 from storage.database.db import get_session
 from storage.database.achievement_manager import AchievementManager, AchievementCreate, AchievementUpdate
 
 
 @tool
-@require_student_access()
 def add_achievement(
-        student_id: int,
+    student_name: str,
     achievement_type: str,
     title: str,
     description: str,
@@ -21,15 +14,28 @@ def add_achievement(
     is_featured: bool,
     runtime: ToolRuntime
 ) -> str:
-    """
-    # 权限检查
-    if not check_student_access(runtime, student_id):
-        return "错误：无权访问该学生的数据"
-    
-    添加成就记录
+    """添加成就记录
     
     Args:
-        student_id: 学生ID}的学生"
+        student_name: 学生姓名
+        achievement_type: 成就类型（homework_exercise/course_complete/reading_goal/study_effort/health_sport/creativity/persistence/other）
+        title: 成就标题
+        description: 成就描述
+        points: 获得积分
+        level: 等级（bronze/silver/gold/platinum/diamond）
+        is_featured: 是否展示在成就墙
+    
+    Returns:
+        操作结果
+    """
+    db = get_session()
+    try:
+        from storage.database.student_manager import StudentManager
+        student_mgr = StudentManager()
+        student = student_mgr.get_student_by_name(db, student_name)
+        
+        if not student:
+            return f"未找到姓名为{student_name}的学生"
         
         achievement_mgr = AchievementManager()
         achievement = achievement_mgr.create_achievement(db, AchievementCreate(
@@ -53,17 +59,23 @@ def add_achievement(
 
 
 @tool
-def get_achievement_wall(
-        student_id: int, runtime: ToolRuntime) -> str:
-    """
-    # 权限检查
-    if not check_student_access(runtime, student_id):
-        return "错误：无权访问该学生的数据"
-    
-    获取学生的成就墙
+def get_achievement_wall(student_name: str, runtime: ToolRuntime) -> str:
+    """获取学生的成就墙
     
     Args:
-        student_id: 学生ID}的学生"
+        student_name: 学生姓名
+    
+    Returns:
+        成就墙数据
+    """
+    db = get_session()
+    try:
+        from storage.database.student_manager import StudentManager
+        student_mgr = StudentManager()
+        student = student_mgr.get_student_by_name(db, student_name)
+        
+        if not student:
+            return f"未找到姓名为{student_name}的学生"
         
         achievement_mgr = AchievementManager()
         wall = achievement_mgr.get_achievement_wall(db, student.id)
@@ -96,17 +108,23 @@ def get_achievement_wall(
 
 
 @tool
-def get_all_achievements(
-        student_id: int, runtime: ToolRuntime) -> str:
-    """
-    # 权限检查
-    if not check_student_access(runtime, student_id):
-        return "错误：无权访问该学生的数据"
-    
-    获取学生的所有成就
+def get_all_achievements(student_name: str, runtime: ToolRuntime) -> str:
+    """获取学生的所有成就
     
     Args:
-        student_id: 学生ID}的学生"
+        student_name: 学生姓名
+    
+    Returns:
+        所有成就列表
+    """
+    db = get_session()
+    try:
+        from storage.database.student_manager import StudentManager
+        student_mgr = StudentManager()
+        student = student_mgr.get_student_by_name(db, student_name)
+        
+        if not student:
+            return f"未找到姓名为{student_name}的学生"
         
         achievement_mgr = AchievementManager()
         achievements = achievement_mgr.get_student_achievements(db, student.id)

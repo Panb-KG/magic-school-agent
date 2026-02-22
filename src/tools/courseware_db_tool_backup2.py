@@ -1,18 +1,11 @@
 from langchain.tools import tool, ToolRuntime
-from tools.tool_utils_fixed import (
-    get_user_context,
-    check_student_access,
-    require_student_access,
-    get_student_name_by_id
-)
 from storage.database.db import get_session
 from storage.database.courseware_manager import CoursewareManager, CoursewareCreate, CoursewareUpdate
 
 
 @tool
-@require_student_access()
 def add_courseware(
-        student_id: int,
+    student_name: str,
     title: str,
     subject: str,
     file_type: str,
@@ -21,15 +14,28 @@ def add_courseware(
     description: str,
     runtime: ToolRuntime
 ) -> str:
-    """
-    # 权限检查
-    if not check_student_access(runtime, student_id):
-        return "错误：无权访问该学生的数据"
-    
-    添加课件
+    """添加课件
     
     Args:
-        student_id: 学生ID}的学生"
+        student_name: 学生姓名
+        title: 课件标题
+        subject: 科目
+        file_type: 文件类型（pdf/doc/ppt/image/video/other）
+        file_url: 文件URL
+        category: 分类标签
+        description: 课件描述
+    
+    Returns:
+        操作结果
+    """
+    db = get_session()
+    try:
+        from storage.database.student_manager import StudentManager
+        student_mgr = StudentManager()
+        student = student_mgr.get_student_by_name(db, student_name)
+        
+        if not student:
+            return f"未找到姓名为{student_name}的学生"
         
         courseware_mgr = CoursewareManager()
         courseware = courseware_mgr.create_courseware(db, CoursewareCreate(
@@ -49,17 +55,24 @@ def add_courseware(
 
 
 @tool
-def get_courseware_list(
-        student_id: int, subject: str, runtime: ToolRuntime) -> str:
-    """
-    # 权限检查
-    if not check_student_access(runtime, student_id):
-        return "错误：无权访问该学生的数据"
-    
-    获取学生的课件列表
+def get_courseware_list(student_name: str, subject: str, runtime: ToolRuntime) -> str:
+    """获取学生的课件列表
     
     Args:
-        student_id: 学生ID}的学生"
+        student_name: 学生姓名
+        subject: 科目筛选（可选）
+    
+    Returns:
+        课件列表
+    """
+    db = get_session()
+    try:
+        from storage.database.student_manager import StudentManager
+        student_mgr = StudentManager()
+        student = student_mgr.get_student_by_name(db, student_name)
+        
+        if not student:
+            return f"未找到姓名为{student_name}的学生"
         
         courseware_mgr = CoursewareManager()
         coursewares = courseware_mgr.get_student_coursewares(db, student.id, subject=subject if subject else None)

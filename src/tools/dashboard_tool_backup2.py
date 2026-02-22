@@ -1,11 +1,5 @@
 from typing import Dict, Any, List, Optional
 from langchain.tools import tool, ToolRuntime
-from tools.tool_utils_fixed import (
-    get_user_context,
-    check_student_access,
-    require_student_access,
-    get_student_name_by_id
-)
 from storage.database.db import get_session
 from storage.database.student_manager import StudentManager
 from storage.database.homework_manager import HomeworkManager
@@ -31,15 +25,8 @@ def _safe_str(value: Any) -> str:
 
 
 @tool
-@require_student_access()
-def get_student_dashboard(
-        student_id: int, runtime: ToolRuntime) -> str:
-    """
-    # 权限检查
-    if not check_student_access(runtime, student_id):
-        return "错误：无权访问该学生的数据"
-    
-    获取学生仪表盘数据（用于Web前端展示）
+def get_student_dashboard(student_name: str, runtime: ToolRuntime) -> str:
+    """获取学生仪表盘数据（用于Web前端展示）
     
     返回格式化的JSON数据，包含：
     - 学生档案信息
@@ -49,7 +36,18 @@ def get_student_dashboard(
     - 快速操作建议
     
     Args:
-        student_id: 学生ID}"}}'
+        student_name: 学生姓名
+    
+    Returns:
+        JSON格式的仪表盘数据
+    """
+    db = get_session()
+    try:
+        student_mgr = StudentManager()
+        student = student_mgr.get_student_by_name(db, student_name)
+        
+        if not student:
+            return f'{{"error": "未找到学生 {student_name}"}}'
         
         # 1. 学生档案
         profile = {
@@ -211,7 +209,18 @@ def get_student_profile_summary(student_name: str, runtime: ToolRuntime) -> str:
     """获取学生档案摘要（用于展示卡片）
     
     Args:
-        student_id: 学生ID}"}}'
+        student_name: 学生姓名
+    
+    Returns:
+        JSON格式的学生档案数据
+    """
+    db = get_session()
+    try:
+        student_mgr = StudentManager()
+        student = student_mgr.get_student_by_name(db, student_name)
+        
+        if not student:
+            return f'{{"error": "未找到学生 {student_name}"}}'
         
         # 获取成就统计
         achievement_mgr = AchievementManager()

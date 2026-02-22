@@ -1,11 +1,5 @@
 from typing import Dict, Any, List, Optional
 from langchain.tools import tool, ToolRuntime
-from tools.tool_utils_fixed import (
-    get_user_context,
-    check_student_access,
-    require_student_access,
-    get_student_name_by_id
-)
 from storage.database.db import get_session
 from storage.database.student_manager import StudentManager
 from storage.database.course_manager import CourseManager
