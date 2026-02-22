@@ -35,9 +35,9 @@ DATABASE_URL=postgresql://username:password@localhost:5432/magic_school
 # JWT密钥（请修改为随机字符串）
 JWT_SECRET=your-secret-key-here
 
-# 阿里云百炼配置
-COZE_WORKLOAD_IDENTITY_API_KEY=your-aliyun-api-key
-COZE_INTEGRATION_MODEL_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+# 阿里云百炼配置（使用标准命名）
+DASHSCOPE_API_KEY=your-aliyun-api-key
+OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 
 # 其他配置
 DEBUG=True
@@ -76,6 +76,10 @@ python scripts/init_database.py
 
 **终端1 - 启动后端服务**:
 ```bash
+# 使用项目启动脚本（默认端口5000）
+python src/main.py -m http -p 5000
+
+# 或者使用uvicorn（默认端口8000）
 uvicorn src.main:app --reload --port 8000
 ```
 
@@ -85,13 +89,26 @@ cd magic-school-frontend
 npm run dev
 ```
 
+**注意**：
+- 本地开发可以使用任意端口（如8000、5000等）
+- 部署到Coze平台时，应用内部端口为5000，外部访问端口为80（自动处理）
+
 ---
 
 ## 步骤5: 访问应用
 
+### 本地开发环境
 - **前端地址**: http://localhost:5173
-- **API文档**: http://localhost:8000/docs
-- **WebSocket测试**: ws://localhost:8000/ws/chat
+- **API文档**: http://localhost:5000/docs（如果使用5000端口）
+- **API文档**: http://localhost:8000/docs（如果使用8000端口）
+- **WebSocket测试**: ws://localhost:5000/ws/chat（如果使用5000端口）
+
+### Coze部署环境
+- **前端地址**: https://your-domain.coze.site
+- **API文档**: https://your-domain.coze.site/docs
+- **WebSocket测试**: wss://your-domain.coze.site/ws/chat
+
+**注意**：Coze部署后无需指定端口，系统会自动处理。
 
 ---
 

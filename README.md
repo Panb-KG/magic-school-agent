@@ -59,7 +59,7 @@ cd ..
 
 # 4. 配置环境变量
 # 创建 .env 文件（参考 docs/生产环境变量配置模板.txt）
-# 必须配置: JWT_SECRET, COZE_WORKLOAD_IDENTITY_API_KEY, COZE_INTEGRATION_MODEL_BASE_URL
+# 必须配置: JWT_SECRET, DASHSCOPE_API_KEY, OPENAI_BASE_URL
 
 # 5. 初始化数据库
 python scripts/init_database.py
