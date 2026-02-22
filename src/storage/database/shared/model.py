@@ -11,6 +11,7 @@ class Student(Base):
     __tablename__ = "students"
 
     id = Column(Integer, primary_key=True, comment="学生ID")
+    user_id = Column(String(50), unique=True, nullable=True, comment="关联的用户ID（关联到auth.users）")
     name = Column(String(128), nullable=False, comment="学生姓名")
     grade = Column(String(32), nullable=True, comment="年级")
     class_name = Column(String(64), nullable=True, comment="班级")
@@ -34,6 +35,8 @@ class Student(Base):
     __table_args__ = (
         Index("ix_students_name", "name"),
         Index("ix_students_school", "school"),
+        Index("ix_students_user_id", "user_id"),
+        Index("ix_students_active", "is_active"),
     )
 
 # 课程表（学校和课外）

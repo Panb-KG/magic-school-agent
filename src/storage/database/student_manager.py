@@ -8,6 +8,7 @@ from storage.database.shared.model import Student
 
 # Pydantic Models
 class StudentCreate(BaseModel):
+    user_id: Optional[str] = Field(None, description="关联的用户ID")
     name: str = Field(..., description="学生姓名")
     grade: Optional[str] = Field(None, description="年级")
     class_name: Optional[str] = Field(None, description="班级")
@@ -60,6 +61,10 @@ class StudentManager:
     def get_student_by_name(self, db: Session, name: str) -> Optional[Student]:
         """根据姓名获取学生"""
         return db.query(Student).filter(Student.name == name).first()
+
+    def get_student_by_user_id(self, db: Session, user_id: str) -> Optional[Student]:
+        """根据用户ID获取学生"""
+        return db.query(Student).filter(Student.user_id == user_id).first()
 
     def update_student(self, db: Session, student_id: int, student_in: StudentUpdate) -> Optional[Student]:
         """更新学生信息"""
