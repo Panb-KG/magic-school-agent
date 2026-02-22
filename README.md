@@ -1,10 +1,29 @@
 # 🪄 魔法课桌学习助手智能体
 
-> 基于LangGraph和多Agent架构的智能学习管理系统，专为小学生和家长设计
+<div align="center">
+  <img src="assets/魔法书AI核.jpg" alt="魔法课桌AI助手Logo" width="200" height="200" />
+  <p>基于LangGraph和多Agent架构的智能学习管理系统，专为小学生和家长设计</p>
+</div>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-1.0-purple.svg)](https://github.com/langchain-ai/langgraph)
+
+---
+
+## 📖 关于Logo
+
+本项目使用"魔法书AI核心"作为官方Logo和对话头像。
+
+**设计理念**:
+- **魔法书**: 象征知识、智慧、传承
+- **发光水晶球**: 象征AI的洞察力和预测能力
+- **AI标识**: 明确智能体身份
+- **魔法符号**: 暗示AI的多元能力
+
+了解更多：[Logo说明文档](docs/Logo说明.md)
+
+---
 
 ## ✨ 特性
 
