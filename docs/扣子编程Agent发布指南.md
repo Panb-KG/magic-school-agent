@@ -19,11 +19,7 @@
 
 ### 1.1 检查 Agent 是否完成
 
-在扣子编程 IDE 中确认：
-- ✅ Agent 代码已开发完成
-- ✅ 已通过测试（使用 test_run 测试）
-- ✅ 配置文件正确（config/agent_llm_config.json）
-- ✅ 工具已正确导入
+
 
 ### 1.2 查看项目结构
 
