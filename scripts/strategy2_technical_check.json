@@ -1,0 +1,26 @@
+{
+  "total_issues": 57,
+  "issues_by_type": {
+    "error_handling": 25,
+    "security": 3,
+    "code_quality": 20,
+    "database": 9
+  },
+  "test_issues": [
+    "测试覆盖率低 (2/77 文件有测试)"
+  ],
+  "doc_issues": [
+    "缺少文档: README.md"
+  ],
+  "scores": {
+    "代码质量": 0,
+    "安全性": 70,
+    "错误处理": 0,
+    "数据库操作": 10,
+    "测试覆盖": 50,
+    "文档完整": 50,
+    "迁移系统": 100
+  },
+  "avg_score": 40.0,
+  "overall_status": "需要改进"
+}
