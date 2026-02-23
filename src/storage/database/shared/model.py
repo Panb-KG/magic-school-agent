@@ -168,3 +168,44 @@ class Achievement(Base):
         Index("ix_achievements_type", "achievement_type"),
         Index("ix_achievements_featured", "is_featured"),
     )
+
+# 对话会话表
+class Conversation(Base):
+    __tablename__ = "conversations"
+
+    id = Column(Integer, primary_key=True, comment="对话ID")
+    user_id = Column(String(50), nullable=False, comment="用户ID")
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=True, comment="关联的学生ID（可选）")
+    title = Column(String(256), nullable=False, comment="对话标题（由AI生成）")
+    summary = Column(Text, nullable=True, comment="对话摘要（可选）")
+    message_count = Column(Integer, default=0, nullable=False, comment="消息数量")
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, comment="创建时间")
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True, comment="最后更新时间")
+
+    # 关系
+    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("ix_conversations_user", "user_id"),
+        Index("ix_conversations_student", "student_id"),
+        Index("ix_conversations_created", "created_at"),
+    )
+
+# 消息表
+class Message(Base):
+    __tablename__ = "messages"
+
+    id = Column(Integer, primary_key=True, comment="消息ID")
+    conversation_id = Column(Integer, ForeignKey("conversations.id"), nullable=False, comment="对话ID")
+    role = Column(String(32), nullable=False, comment="角色：user/assistant")
+    content = Column(Text, nullable=False, comment="消息内容")
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, comment="创建时间")
+
+    # 关系
+    conversation = relationship("Conversation", back_populates="messages")
+
+    __table_args__ = (
+        Index("ix_messages_conversation", "conversation_id"),
+        Index("ix_messages_role", "role"),
+        Index("ix_messages_created", "created_at"),
+    )

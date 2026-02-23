@@ -154,6 +154,20 @@ def build_agent(ctx=None):
         get_date_after,
         get_today_info
     )
+    from tools.conversation_tool import (
+        create_conversation,
+        add_message,
+        get_conversation_list,
+        get_conversation_detail,
+        search_conversations,
+        delete_conversation,
+        update_conversation_title
+    )
+    from tools.conversation_title_tool import (
+        generate_conversation_title,
+        generate_title_from_messages,
+        batch_generate_titles
+    )
 
     # 基础工具列表
     tools = [
@@ -227,6 +241,18 @@ def build_agent(ctx=None):
         get_user_profile,
         update_knowledge_mastery,
         get_knowledge_mastery,
+
+        # 历史对话工具
+        create_conversation,
+        add_message,
+        get_conversation_list,
+        get_conversation_detail,
+        search_conversations,
+        delete_conversation,
+        update_conversation_title,
+        generate_conversation_title,
+        generate_title_from_messages,
+        batch_generate_titles,
     ]
     
     # 根据角色添加专用工具

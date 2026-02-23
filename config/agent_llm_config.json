@@ -49,6 +49,16 @@
         "delete_file",
         "list_student_files",
         "assess_reading",
-        "practice_reading"
+        "practice_reading",
+        "create_conversation",
+        "add_message",
+        "get_conversation_list",
+        "get_conversation_detail",
+        "search_conversations",
+        "delete_conversation",
+        "update_conversation_title",
+        "generate_conversation_title",
+        "generate_title_from_messages",
+        "batch_generate_titles"
     ]
 }
