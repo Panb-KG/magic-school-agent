@@ -45,7 +45,8 @@
 cd /workspace/projects
 
 # 检查Git状态
-git status
+
+
 
 # 确认当前分支
 git branch
