@@ -328,76 +328,77 @@ class FunctionalTester:
         
         for group_name, student in self.user_registry["students"].items():
             try:
-                db = get_session()
-                mgr = StudentManager()
+                with get_session() as db:
+                    mgr = StudentManager()
+                    
+                    # 创建学生记录（不使用 user_id，因为数据库中没有这个字段）
+                    student_record = mgr.create_student(db, StudentCreate(
+                        name=student["name"],
+                        grade=student["grade"],
+                        class_name=student["grade"].replace("年级", "").replace("班", "班"),
+                        school=student["school"],
+                        parent_contact=f"1380013800{group_name[-1]}",
+                        nickname=student["name"][0]
+                    ))
+                    
+                    self.student_records[group_name] = student_record
+                    
+                    self.log_result(
+                        f"创建学生记录 - {student['name']}",
+                        True,
+                        f"学生ID: {student_record.id}"
+                    )
                 
-                # 创建学生记录（不使用 user_id，因为数据库中没有这个字段）
-                student_record = mgr.create_student(db, StudentCreate(
-                    name=student["name"],
-                    grade=student["grade"],
-                    class_name=student["grade"].replace("年级", "").replace("班", "班"),
-                    school=student["school"],
-                    parent_contact=f"1380013800{group_name[-1]}",
-                    nickname=student["name"][0]
-                ))
+                # 创建作业（使用独立的 Session）
+                with get_session() as db:
+                    hw_mgr = HomeworkManager()
+                    homework = hw_mgr.create_homework(db, HomeworkCreate(
+                        student_id=self.student_records[group_name].id,
+                        title=f"{student['name']}的数学作业",
+                        subject="数学",
+                        description="完成练习册第10页",
+                        due_date=datetime.now() + timedelta(days=7),
+                        priority="high"
+                    ))
+                    self.log_result(
+                        f"创建作业 - {student['name']}",
+                        True,
+                        f"作业ID: {homework.id}"
+                    )
                 
-                self.student_records[group_name] = student_record
+                # 创建课程（使用独立的 Session）
+                with get_session() as db:
+                    course_mgr = CourseManager()
+                    course = course_mgr.create_course(db, CourseCreate(
+                        student_id=self.student_records[group_name].id,
+                        course_name=f"{student['name']}的魔法数学课",
+                        course_type="school",
+                        weekday="Monday",
+                        start_time="09:00",
+                        end_time="10:30",
+                        teacher="邓布利多老师"
+                    ))
+                    self.log_result(
+                        f"创建课程 - {student['name']}",
+                        True,
+                        f"课程ID: {course.id}"
+                    )
                 
-                self.log_result(
-                    f"创建学生记录 - {student['name']}",
-                    True,
-                    f"学生ID: {student_record.id}"
-                )
-                
-                # 创建作业
-                hw_mgr = HomeworkManager()
-                homework = hw_mgr.create_homework(db, HomeworkCreate(
-                    student_id=student_record.id,
-                    title=f"{student['name']}的数学作业",
-                    subject="数学",
-                    description="完成练习册第10页",
-                    due_date=datetime.now() + timedelta(days=7),
-                    priority="high"
-                ))
-                self.log_result(
-                    f"创建作业 - {student['name']}",
-                    True,
-                    f"作业ID: {homework.id}"
-                )
-                
-                # 创建课程
-                course_mgr = CourseManager()
-                course = course_mgr.create_course(db, CourseCreate(
-                    student_id=student_record.id,
-                    course_name=f"{student['name']}的魔法数学课",
-                    course_type="school",
-                    weekday="Monday",
-                    start_time="09:00",
-                    end_time="10:30",
-                    teacher="邓布利多老师"
-                ))
-                self.log_result(
-                    f"创建课程 - {student['name']}",
-                    True,
-                    f"课程ID: {course.id}"
-                )
-                
-                # 创建成就
-                ach_mgr = AchievementManager()
-                achievement = ach_mgr.create_achievement(db, AchievementCreate(
-                    student_id=student_record.id,
-                    achievement_type="study_effort",
-                    title=f"{student['name']}的第一个成就",
-                    description="完成首次学习任务",
-                    points=10
-                ))
-                self.log_result(
-                    f"创建成就 - {student['name']}",
-                    True,
-                    f"成就ID: {achievement.id}"
-                )
-                
-                db.close()
+                # 创建成就（使用独立的 Session）
+                with get_session() as db:
+                    ach_mgr = AchievementManager()
+                    achievement = ach_mgr.create_achievement(db, AchievementCreate(
+                        student_id=self.student_records[group_name].id,
+                        achievement_type="study_effort",
+                        title=f"{student['name']}的第一个成就",
+                        description="完成首次学习任务",
+                        points=10
+                    ))
+                    self.log_result(
+                        f"创建成就 - {student['name']}",
+                        True,
+                        f"成就ID: {achievement.id}"
+                    )
             except Exception as e:
                 self.log_result(
                     f"创建学生数据 - {student['name']}",
@@ -416,45 +417,47 @@ class FunctionalTester:
                 continue
             
             try:
-                db = get_session()
-                mgr = StudentManager()
-                
-                # 在新的Session中重新获取学生记录
-                fresh_student = mgr.get_student_by_id(db, student_record.id)
-                if not fresh_student:
+                # 使用 context manager 确保 Session 正确关闭
+                with get_session() as db:
+                    mgr = StudentManager()
+                    
+                    # 在新的Session中重新获取学生记录
+                    fresh_student = mgr.get_student_by_id(db, student_record.id)
+                    if not fresh_student:
+                        self.log_result(
+                            f"学生功能测试 - {student['name']}",
+                            False,
+                            "无法获取学生记录"
+                        )
+                        continue
+                    
+                    # 获取学生信息
+                    info = mgr.get_student_by_id(db, fresh_student.id)
                     self.log_result(
-                        f"学生功能测试 - {student['name']}",
-                        False,
-                        "无法获取学生记录"
+                        f"获取学生信息 - {student['name']}",
+                        info is not None,
+                        f"姓名: {info.name if info else 'None'}"
                     )
-                    db.close()
-                    continue
                 
-                # 获取学生信息
-                info = mgr.get_student_by_id(db, fresh_student.id)
-                self.log_result(
-                    f"获取学生信息 - {student['name']}",
-                    info is not None,
-                    f"姓名: {info.name if info else 'None'}"
-                )
+                # 在新的 Session 中执行增加积分操作
+                with get_session() as db:
+                    mgr = StudentManager()
+                    updated = mgr.add_points(db, student_record.id, 50)
+                    self.log_result(
+                        f"增加积分 - {student['name']}",
+                        updated.total_points > 0,
+                        f"总积分: {updated.total_points}"
+                    )
                 
-                # 增加积分
-                updated = mgr.add_points(db, fresh_student.id, 50)
-                self.log_result(
-                    f"增加积分 - {student['name']}",
-                    updated.total_points > 0,
-                    f"总积分: {updated.total_points}"
-                )
-                
-                # 升级魔法等级
-                upgraded = mgr.upgrade_magic_level(db, fresh_student.id)
-                self.log_result(
-                    f"升级魔法等级 - {student['name']}",
-                    upgraded.magic_level > 1,
-                    f"当前等级: {upgraded.magic_level}"
-                )
-                
-                db.close()
+                # 在新的 Session 中执行升级魔法等级操作
+                with get_session() as db:
+                    mgr = StudentManager()
+                    upgraded = mgr.upgrade_magic_level(db, student_record.id)
+                    self.log_result(
+                        f"升级魔法等级 - {student['name']}",
+                        upgraded.magic_level > 1,
+                        f"当前等级: {upgraded.magic_level}"
+                    )
             except Exception as e:
                 self.log_result(
                     f"学生功能测试 - {student['name']}",
@@ -558,28 +561,36 @@ class FunctionalTester:
             return
         
         try:
-            db = get_session()
-            mgr = StudentManager()
-            hw_mgr = HomeworkManager()
+            # 在独立的 Session 中获取每个学生的作业
+            with get_session() as db:
+                mgr = StudentManager()
+                hw_mgr = HomeworkManager()
+                
+                # 在新的Session中重新获取学生记录
+                fresh_student1 = mgr.get_student_by_id(db, student1.id)
+                fresh_student2 = mgr.get_student_by_id(db, student2.id)
+                fresh_student3 = mgr.get_student_by_id(db, student3.id)
+                
+                if not all([fresh_student1, fresh_student2, fresh_student3]):
+                    self.log_result(
+                        "数据隔离测试",
+                        False,
+                        "无法重新获取学生记录"
+                    )
+                    return
             
-            # 在新的Session中重新获取学生记录
-            fresh_student1 = mgr.get_student_by_id(db, student1.id)
-            fresh_student2 = mgr.get_student_by_id(db, student2.id)
-            fresh_student3 = mgr.get_student_by_id(db, student3.id)
+            # 获取每个学生的作业（使用独立的 Session）
+            with get_session() as db:
+                hw_mgr = HomeworkManager()
+                hw1 = hw_mgr.get_student_homeworks(db, student1.id)
             
-            if not all([fresh_student1, fresh_student2, fresh_student3]):
-                self.log_result(
-                    "数据隔离测试",
-                    False,
-                    "无法重新获取学生记录"
-                )
-                db.close()
-                return
+            with get_session() as db:
+                hw_mgr = HomeworkManager()
+                hw2 = hw_mgr.get_student_homeworks(db, student2.id)
             
-            # 获取每个学生的作业
-            hw1 = hw_mgr.get_student_homeworks(db, fresh_student1.id)
-            hw2 = hw_mgr.get_student_homeworks(db, fresh_student2.id)
-            hw3 = hw_mgr.get_student_homeworks(db, fresh_student3.id)
+            with get_session() as db:
+                hw_mgr = HomeworkManager()
+                hw3 = hw_mgr.get_student_homeworks(db, student3.id)
             
             # 验证作业数量
             self.log_result(
@@ -599,7 +610,6 @@ class FunctionalTester:
                 f"学生1和学生2的作业重复数: {len(intersection)}"
             )
             
-            db.close()
         except Exception as e:
             self.log_result(
                 "数据隔离测试",
