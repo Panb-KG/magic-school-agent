@@ -47,6 +47,9 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
 class RewardPointsRequest(BaseModel):
     student_id: str
     points: int
@@ -131,6 +134,23 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="用户不存在")
     
     return user_info
+
+@app.post("/api/auth/refresh", tags=["认证"])
+async def refresh_token(request: RefreshTokenRequest):
+    """刷新访问令牌"""
+    from auth.auth_utils import refresh_access_token
+    
+    result = refresh_access_token(request.refresh_token)
+    
+    if not result:
+        raise HTTPException(status_code=401, detail="刷新令牌无效或已过期")
+    
+    return result
+
+@app.post("/api/auth/logout", tags=["认证"])
+async def logout(current_user: dict = Depends(get_current_user)):
+    """登出（客户端删除Token）"""
+    return {"success": True, "message": "登出成功"}
 
 # ============================================
 # 家长功能 API

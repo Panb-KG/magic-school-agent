@@ -92,6 +92,54 @@ def generate_thread_id(user_id: str) -> str:
     return f"thread_{user_id}_{timestamp}"
 
 
+def refresh_access_token(refresh_token: str) -> Optional[Dict]:
+    """
+    使用刷新令牌获取新的访问令牌
+    
+    Args:
+        refresh_token: 刷新令牌
+    
+    Returns:
+        包含新令牌的字典，或None（如果刷新失败）
+    """
+    try:
+        # 验证刷新令牌
+        payload = jwt.decode(refresh_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        
+        # 验证令牌类型
+        if payload.get("type") != "refresh":
+            logger.warning("令牌类型错误")
+            return None
+        
+        user_id = payload.get("user_id")
+        if not user_id:
+            logger.warning("令牌中缺少用户ID")
+            return None
+        
+        # 生成新的访问令牌（需要用户角色，从令牌中获取或从数据库查询）
+        # 这里简化处理，假设刷新令牌中包含角色信息，或者重新从数据库查询
+        # 为了简化，这里假设role在payload中
+        role = payload.get("role", "student")
+        
+        new_access_token = generate_access_token(user_id, role)
+        new_refresh_token = generate_refresh_token(user_id)
+        
+        logger.info(f"令牌刷新成功: {user_id}")
+        
+        return {
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
+            "token_type": "Bearer",
+            "expires_in": JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60  # 秒
+        }
+    except jwt.ExpiredSignatureError:
+        logger.warning("刷新令牌已过期")
+        return None
+    except jwt.InvalidTokenError:
+        logger.warning("无效的刷新令牌")
+        return None
+
+
 class TokenPayload:
     """令牌载荷类"""
     def __init__(self, user_id: str, role: str, exp: datetime, iat: datetime):

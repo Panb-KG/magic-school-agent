@@ -337,6 +337,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ============ WebSocket 路由 ============
+from api.websocket_api import router as websocket_router
+app.include_router(websocket_router)
+
+# ============ 对话路由 ============
+from api.chat_api import router as chat_router
+app.include_router(chat_router)
+
 @app.post("/run")
 async def http_run(request: Request) -> Dict[str, Any]:
     global result
