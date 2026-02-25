@@ -73,6 +73,68 @@
 
 ## 🚀 快速开始
 
+### 📌 部署方式选择
+
+本项目支持**两种部署方式**，请根据您的需求选择：
+
+#### 方式 A：Coze 平台模式（推荐开发/测试）⚡
+
+- ✅ **无需部署**：代码运行在 Coze 平台沙箱中
+- ✅ **立即可用**：获取 API Key 后直接调用
+- ✅ **简单快捷**：无需配置服务器和数据库
+- ⚠️ **限制**：无法使用自定义域名，无 WebSocket 支持
+
+**适用场景**：
+- 快速开发和测试
+- 演示和原型
+- 不需要复杂部署的场景
+
+👉 [查看 Coze API 集成指南](COZE_API_GUIDE.md)
+
+**快速测试**：
+```bash
+# 打开演示页面
+open examples/coze-api-demo.html
+
+# 或使用 Python SDK
+python examples/coze_client.py
+```
+
+---
+
+#### 方式 B：独立服务模式（推荐生产环境）🚀
+
+- ✅ **完整功能**：REST API + WebSocket
+- ✅ **自定义域名**：使用自己的域名
+- ✅ **完全控制**：自主管理认证、数据库等
+- ✅ **数据隔离**：多租户数据完全隔离
+- ⏳ **需要部署**：需要配置服务器
+
+**适用场景**：
+- 生产环境
+- 需要自定义域名
+- 需要完整功能控制
+
+👉 [查看独立部署指南](DEPLOYMENT_GUIDE_COMPLETE.md)
+
+**快速部署**：
+```bash
+# 1. 安装依赖
+pip install -r requirements.txt
+
+# 2. 配置环境变量
+cp docs/生产环境变量配置模板.txt .env
+vi .env
+
+# 3. 初始化数据库
+python scripts/init_database.py
+
+# 4. 启动服务
+python src/main.py -m http -p 5000
+```
+
+---
+
 ### 环境要求
 
 - Python 3.8+
@@ -460,6 +522,60 @@ git push origin main
 # 4. 配置Nginx
 # 5. 配置SSL证书
 # 6. 启动服务
+```
+
+---
+
+## 📚 快速集成
+
+### Coze API 集成（推荐快速开始）
+
+如果您想快速开始使用，推荐使用 **Coze 平台模式**：
+
+#### 📖 完整文档
+- [Coze API 调用指南](COZE_API_GUIDE.md) - 详细的 API 使用说明
+- [API 部署架构说明](API_DEPLOYMENT_GUIDE.md) - 部署方式对比
+
+#### 💻 代码示例
+- [HTML 演示页面](examples/coze-api-demo.html) - 纯 HTML/JS 演示
+- [React 集成示例](examples/react-integration-example.md) - React 完整集成
+- [Python SDK](examples/coze_client.py) - Python 客户端封装
+
+#### 🚀 5 分钟快速测试
+
+```javascript
+// JavaScript 示例
+const response = await fetch('https://api.coze.com/open_api/v2/stream_run', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_COZE_API_KEY',
+    'Content-Type': 'application/json',
+    'Accept': 'text/event-stream'
+  },
+  body: JSON.stringify({
+    bot_id: 'YOUR_BOT_ID',
+    user_id: 'session_123',
+    additional_messages: [{
+      role: 'user',
+      content: '你好',
+      content_type: 'text'
+    }],
+    stream: true
+  })
+});
+```
+
+```python
+# Python 示例
+from coze_client import MagicDeskAssistant
+
+assistant = MagicDeskAssistant(
+    api_key="your_api_key",
+    bot_id="your_bot_id"
+)
+
+answer = assistant.ask("你好", "session_123", stream=True)
+print(answer)
 ```
 
 ---
