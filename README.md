@@ -107,6 +107,35 @@ npm run dev
 - **API文档**: http://localhost:8000/docs
 - **WebSocket**: ws://localhost:8000/ws/chat
 
+## 📖 文档
+
+### 技术文档
+- **[技术实现详解](AGENT_TECHNICAL_SPECIFICATION.md)** ⭐ - 功能、API、认证、数据隔离、记忆实现详解（推荐）
+- [多用户架构功能说明](docs/MULTIUSER_GUIDE.md) - 多用户、长期记忆系统说明
+- [功能说明文档](docs/功能说明文档.md) - 完整功能模块说明
+- [权限检查完善总结](docs/权限检查完善总结.md) - 权限管理详解
+
+### API文档
+- [API完整文档](API_DOCUMENTATION.md) - REST API接口文档
+- [后端API文档](docs/后端API完整文档-Figma设计用.md) - 后端API详解
+- [前端调用指南](docs/前端调用魔法课桌智能体指南.md) - 前端集成指南
+- [前端调用快速开始](docs/前端调用魔法课桌智能体快速开始.md) - 前端集成快速开始
+
+### 部署文档
+- [快速部署开始](DEPLOYMENT_QUICK_START.md) - 5分钟快速部署
+- [完整部署指南](DEPLOYMENT_GUIDE_COMPLETE.md) - 详细步骤和配置
+- [部署命令速查表](DEPLOYMENT_COMMANDS.md) - 常用命令集合
+- [部署检查清单](DEPLOYMENT_CHECKLIST.md) - 部署前检查项
+- [扣子平台部署指南](docs/扣子平台部署指南.md) - Coze平台部署详解
+- [扣子平台部署快速参考卡](docs/扣子平台部署快速参考卡.md) - 部署快速参考
+- [环境变量配置模板](docs/生产环境变量配置模板.txt) - 生产环境配置模板
+
+### 测试文档
+- [完整功能测试报告](session_fix_report_20250224.md) - Session管理修复报告
+- [回滚验证报告](test_report_rollback_20250224.md) - 回滚后功能验证
+- [功能完备性评估报告](docs/功能完备性评估报告.md) - 功能完整性评估
+- [Agent软件完备性检查报告](docs/Agent软件完备性检查报告.md) - Agent完备性检查
+
 ### 🚀 生产部署
 
 #### 🎯 推荐部署方案
