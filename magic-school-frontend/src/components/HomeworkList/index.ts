@@ -1,1 +1,0 @@
-export { HomeworkList } from './HomeworkList';

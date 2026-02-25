@@ -1,64 +1,81 @@
-# 🪄 魔法课桌学习助手智能体
+# 🪄 魔法课桌学习助手智能体 - 后端API服务
 
 <div align="center">
   <img src="assets/魔法书AI核.jpg" alt="魔法课桌AI助手Logo" width="200" height="200" />
-  <p>基于LangGraph和多Agent架构的智能学习管理系统，专为小学生和家长设计</p>
+  <p>基于LangGraph和多Agent架构的智能学习管理系统后端服务，专为小学生和家长设计</p>
 </div>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-1.0-purple.svg)](https://github.com/langchain-ai/langgraph)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
 
 ---
 
-## 📖 关于Logo
+## 📖 关于
 
-本项目使用"魔法书AI核心"作为官方Logo和对话头像。
+魔法课桌学习助手智能体是一款**后端API服务**，提供完整的学习管理功能，包括：
 
-**设计理念**:
-- **魔法书**: 象征知识、智慧、传承
-- **发光水晶球**: 象征AI的洞察力和预测能力
-- **AI标识**: 明确智能体身份
-- **魔法符号**: 暗示AI的多元能力
-
-了解更多：[Logo说明文档](docs/Logo说明.md)
+- ✅ **智能对话系统**：基于LangGraph的多Agent架构
+- ✅ **多用户支持**：学生和家长双角色，完善的权限管理
+- ✅ **长期记忆**：记忆用户偏好、对话摘要、知识掌握度
+- ✅ **数据隔离**：完全的多租户数据隔离，确保数据安全
+- ✅ **时间感知**：自动获取和处理时间信息
+- ✅ **30+工具**：课程管理、作业管理、成就系统等
+- ✅ **实时通信**：WebSocket支持，流式响应
+- ✅ **完整API**：RESTful API + WebSocket
 
 ---
 
-## ✨ 特性
+## ✨ 核心特性
 
-### 🎯 核心功能
+### 🎯 功能模块
 
-- **智能对话系统**: 基于LangGraph的多Agent架构
-- **多用户支持**: 学生和家长双角色
-- **长期记忆**: 记忆用户偏好和历史
-- **时间感知**: 自动获取和处理时间信息
-- **30+工具**: 课程管理、作业管理、成就系统等
+- **智能对话中心** 🧙‍♂️
+  - 自然语言理解
+  - 工具调用机制
+  - 多轮对话能力
+  - 启发式引导
 
-### 🎨 魔法元素
+- **用户认证系统** 🔐
+  - JWT Token认证
+  - Token自动刷新
+  - bcrypt密码加密
+  - 学生/家长双角色
 
-- 游戏化学习体验
-- 魔法等级和积分系统
-- 成就墙展示
-- 友好的魔法主题对话
+- **数据管理** 📊
+  - 课程表管理
+  - 作业管理
+  - 成就系统
+  - 学生档案
 
-### 📚 功能模块
+- **会话管理** 💬
+  - 对话历史管理
+  - 会话标题生成
+  - 会话搜索功能
+  - 批量操作
 
-- 📅 课程表管理
-- 📝 作业管理
-- 🏆 成就系统
-- 🏃 运动记录
-- 📖 朗读练习和评估
-- 👨‍👩‍👧‍👦 家长管理
-- 💾 文件管理
-- 💬 对话会话管理
+- **记忆系统** 🧠
+  - 对话摘要
+  - 用户画像
+  - 知识掌握度
+  - 行为偏好
+
+### 🚀 技术特性
+
+- **实时通信**：WebSocket支持流式对话
+- **流式响应**：Server-Sent Events (SSE)
+- **数据隔离**：多租户架构
+- **权限管理**：基于角色的访问控制
+- **安全认证**：JWT + bcrypt加密
+
+---
 
 ## 🚀 快速开始
 
 ### 环境要求
 
 - Python 3.8+
-- Node.js 18+
 - PostgreSQL 13+
 - Redis 6+ (可选)
 
@@ -72,45 +89,82 @@ cd magic-school-agent
 # 2. 安装Python依赖
 pip install -r requirements.txt
 
-# 3. 安装前端依赖
-cd magic-school-frontend
-npm install
-cd ..
-
-# 4. 配置环境变量
+# 3. 配置环境变量
 # 创建 .env 文件（参考 docs/生产环境变量配置模板.txt）
 # 必须配置: JWT_SECRET, DASHSCOPE_API_KEY, OPENAI_BASE_URL
 
-# 5. 初始化数据库
+# 4. 初始化数据库
 python scripts/init_database.py
 ```
 
 ### 启动服务
 
 ```bash
-# 方式1: 使用一键启动脚本（推荐）
-./scripts/start_all_services.sh
+# 方式1: 使用HTTP模式（推荐）
+python src/main.py -m http -p 5000
 
-# 方式2: 手动启动
+# 方式2: 使用Agent模式
+python src/main.py -m agent
 
-# 1. 启动API后端（端口8000）
-uvicorn src.main:app --reload --port 8000
-
-# 2. 启动前端服务（端口5173）
-cd magic-school-frontend
-npm run dev
+# 服务将在 http://localhost:5000 启动
 ```
 
 ### 访问应用
 
-- **前端**: http://localhost:5173
-- **API文档**: http://localhost:8000/docs
-- **WebSocket**: ws://localhost:8000/ws/chat
+- **API文档**: http://localhost:5000/docs
+- **WebSocket**: ws://localhost:5000/ws/chat
+- **健康检查**: http://localhost:5000/health
+
+---
+
+## 📁 项目结构
+
+```
+magic-school-agent/
+├── src/                    # 智能体核心代码
+│   ├── agents/           # Agent定义
+│   │   └── agent.py      # 主Agent实现
+│   ├── tools/            # 工具实现
+│   │   ├── conversation_tool.py  # 对话工具
+│   │   ├── course_tool.py       # 课程工具
+│   │   ├── homework_tool.py      # 作业工具
+│   │   └── ...                    # 其他工具
+│   ├── api/              # API接口
+│   │   ├── multiuser_api.py      # 多用户API
+│   │   ├── websocket_api.py      # WebSocket API
+│   │   └── chat_api.py           # 对话API
+│   ├── auth/             # 认证模块
+│   │   ├── auth_utils.py         # 认证工具
+│   │   ├── user_manager.py       # 用户管理
+│   │   └── permissions.py        # 权限管理
+│   ├── storage/          # 数据存储
+│   │   ├── database/             # 数据库管理
+│   │   ├── memory/               # 长期记忆
+│   │   └── session.py            # 会话管理
+│   └── main.py           # FastAPI入口
+├── config/               # 配置文件
+│   ├── agent_llm_config.json  # Agent配置
+│   └── logo.config.js         # Logo配置
+├── scripts/              # 脚本工具
+│   ├── init_database.py        # 数据库初始化
+│   ├── test_full_functionality.py  # 功能测试
+│   └── manage_agent.sh         # Agent管理脚本
+├── tests/                # 测试代码
+│   ├── test_agent_completeness.py  # Agent测试
+│   ├── test_multiuser.py          # 多用户测试
+│   └── test_base.py               # 测试基类
+├── docs/                 # 文档
+├── assets/               # 资源文件
+├── requirements.txt      # Python依赖
+└── README.md            # 本文件
+```
+
+---
 
 ## 📖 文档
 
 ### 技术文档
-- **[技术实现详解](AGENT_TECHNICAL_SPECIFICATION.md)** ⭐ - 功能、API、认证、数据隔离、记忆实现详解（推荐）
+- **[技术实现详解](AGENT_TECHNICAL_SPECIFICATION.md)** ⭐ - 功能、API、认证、数据隔离、记忆实现详解
 - [多用户架构功能说明](docs/MULTIUSER_GUIDE.md) - 多用户、长期记忆系统说明
 - [功能说明文档](docs/功能说明文档.md) - 完整功能模块说明
 - [权限检查完善总结](docs/权限检查完善总结.md) - 权限管理详解
@@ -118,15 +172,14 @@ npm run dev
 ### API文档
 - [API完整文档](API_DOCUMENTATION.md) - REST API接口文档
 - [后端API文档](docs/后端API完整文档-Figma设计用.md) - 后端API详解
-- [前端调用指南](docs/前端调用魔法课桌智能体指南.md) - 前端集成指南
-- [前端调用快速开始](docs/前端调用魔法课桌智能体快速开始.md) - 前端集成快速开始
 
 ### 部署文档
+- [后端开发计划](BACKEND_DEVELOPMENT_PLAN.md) - 后端开发计划和进度
+- [完整部署指南](DEPLOYMENT_GUIDE_COMPLETE.md) - 详细部署步骤
 - [快速部署开始](DEPLOYMENT_QUICK_START.md) - 5分钟快速部署
-- [完整部署指南](DEPLOYMENT_GUIDE_COMPLETE.md) - 详细步骤和配置
 - [部署命令速查表](DEPLOYMENT_COMMANDS.md) - 常用命令集合
 - [部署检查清单](DEPLOYMENT_CHECKLIST.md) - 部署前检查项
-- [扣子平台部署指南](docs/扣子平台部署指南.md) - Coze平台部署详解
+- [扣子平台部署指南](docs/扣子平台部署指南.md) - Coze平台部署
 - [扣子平台部署快速参考卡](docs/扣子平台部署快速参考卡.md) - 部署快速参考
 - [环境变量配置模板](docs/生产环境变量配置模板.txt) - 生产环境配置模板
 
@@ -136,71 +189,7 @@ npm run dev
 - [功能完备性评估报告](docs/功能完备性评估报告.md) - 功能完整性评估
 - [Agent软件完备性检查报告](docs/Agent软件完备性检查报告.md) - Agent完备性检查
 
-### 🚀 生产部署
-
-#### 🎯 推荐部署方案
-
-**方案一：扣子平台部署**（推荐新手）
-- ⏱️ **部署时间**：5分钟
-- 💰 **成本**：免费/低成本
-- ✅ **适用场景**：快速上线、测试、演示
-
-📖 [快速部署开始](DEPLOYMENT_QUICK_START.md) - 5分钟上线指南
-📖 [扣子平台部署指南](docs/扣子平台部署指南.md) - 详细步骤
-📖 [扣子平台快速参考卡](docs/扣子平台部署快速参考卡.md) - 快速参考
-
-**方案二：阿里云ECS部署**（推荐生产）
-- ⏱️ **部署时间**：30分钟
-- 💰 **成本**：约¥190/月
-- ✅ **适用场景**：正式生产、完全控制
-
-📖 [完整部署指南](DEPLOYMENT_GUIDE_COMPLETE.md) - 详细步骤和配置
-📖 [部署命令速查表](DEPLOYMENT_COMMANDS.md) - 常用命令集合
-📖 [部署检查清单](DEPLOYMENT_CHECKLIST.md) - 部署前检查项
-
-#### 📊 部署方案对比
-
-| 方案 | 难度 | 成本 | 时间 | 适用场景 |
-|------|------|------|------|----------|
-| 扣子平台 | ⭐ 简单 | 免费/低成本 | 5分钟 | 快速测试、演示 |
-| 阿里云ECS | ⭐⭐⭐ 中等 | ¥190/月 | 30分钟 | 正式生产 |
-
-#### 🎯 快速部署流程
-
-1. **扣子平台部署**（推荐首次部署）
-   - [快速部署开始](DEPLOYMENT_QUICK_START.md) - 跟着步骤操作
-   - 配置环境变量（API Key、JWT密钥）
-   - 推送到GitHub
-   - 扣子平台一键部署
-
-2. **阿里云ECS部署**（推荐正式上线）
-   - [完整部署指南](DEPLOYMENT_GUIDE_COMPLETE.md) - 详细配置
-   - 购买ECS服务器
-   - 安装依赖和配置
-   - 启动服务和验证
-
-### 测试账号
-
-- **学生**: `student` / `password123`
-- **家长**: `parent` / `password123`
-
-## 📁 项目结构
-
-```
-magic-school-agent/
-├── src/                    # 智能体核心代码
-│   ├── agents/           # Agent定义
-│   ├── tools/            # 工具实现
-│   ├── api/              # API接口
-│   └── main.py           # FastAPI入口
-├── config/               # 配置文件
-├── scripts/              # 脚本工具
-├── docs/                 # 文档
-├── assets/               # 资源文件
-├── magic-school-frontend/ # 前端代码
-├── requirements.txt      # Python依赖
-└── README.md
-```
+---
 
 ## 🔧 配置
 
@@ -210,20 +199,19 @@ magic-school-agent/
 
 ```env
 # 数据库配置
-DATABASE_URL=postgresql://user:password@localhost:5432/magic_school
+PGDATABASE_URL=postgresql://user:password@localhost:5432/magic_school
 
 # 大模型配置
-LLM_API_KEY=your_api_key
-LLM_MODEL=doubao-seed-1-6-251015
+DASHSCOPE_API_KEY=sk-your-api-key-here
+OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 
 # JWT配置
-SECRET_KEY=your_secret_key
-JWT_ALGORITHM=HS256
+JWT_SECRET=your-super-secret-jwt-key-change-in-production-min-32-chars
 
-# 服务端口
-API_PORT=3000
-AGENT_PORT=5000
-FRONTEND_PORT=5173
+# 服务配置
+API_PORT=5000
+DEBUG=False
+LOG_LEVEL=INFO
 ```
 
 ### Agent配置
@@ -236,140 +224,258 @@ FRONTEND_PORT=5173
     "model": "doubao-seed-1-6-251015",
     "temperature": 0.8,
     "top_p": 0.9,
-    "max_completion_tokens": 4000
+    "max_completion_tokens": 4000,
+    "timeout": 600,
+    "thinking": "disabled"
   },
-  "sp": "系统提示词...",
-  "tools": ["工具列表"]
+  "sp": "你是一个魔法学习助手...",
+  "tools": [
+    "create_student_profile",
+    "get_student_profile",
+    "create_course",
+    "get_course_schedule",
+    "create_homework",
+    "get_homeworks",
+    "create_achievement",
+    "get_achievements",
+    "save_conversation_memory",
+    "retrieve_relevant_memories"
+  ]
 }
 ```
 
-## 📖 文档
+---
 
-### 用户文档
-- [README](README.md) - 项目概述
-- [快速开始](QUICK_START.md) - 5分钟快速入门
-- [项目概览](OVERVIEW.txt) - 项目快速参考
+## 📡 API接口
 
-### 部署文档
-- [扣子平台部署指南](docs/扣子编程项目部署实际操作指南.md) - Coze平台部署详解 ⭐
-- [扣子平台部署快速参考卡](docs/扣子平台部署快速参考卡.md) - 部署快速参考 ⭐
-- [环境变量配置模板](docs/生产环境变量配置模板.txt) - 生产环境配置模板
-- [部署指南](DEPLOYMENT_GUIDE.md) - 通用部署指南
-
-### API文档
-- [API完整文档](API_DOCUMENTATION.md) - REST API接口文档
-- [后端API文档](docs/后端API完整文档-Figma设计用.md) - 后端API详解
-- [前端调用指南](docs/前端调用魔法课桌智能体指南.md) - 前端集成指南
-
-### 开发文档
-- [开发指南](DEVELOPMENT_GUIDE.md) - 开发者指南
-- [项目结构](PROJECT_STRUCTURE.md) - 项目结构说明
-- [架构设计](ARCHITECTURE.md) - 系统架构
-- [魔法课桌部署方案](docs/魔法课桌智能体部署方案分析.md) - 部署方案分析
-
-### 发布文档
-- [发布清单](RELEASE_CHECKLIST.md) - 发布前检查清单
-- [发布说明](RELEASE_NOTES.md) - 版本发布说明
-- [交付清单](PROJECT_DELIVERY_CHECKLIST.md) - 项目交付清单
-- [状态报告](PROJECT_STATUS_REPORT.md) - 项目状态报告
-- [开发历程](PROJECT_JOURNEY.md) - 项目开发历程
-
-## 🛠️ 技术栈
-
-### 后端
-
-- **框架**: FastAPI, LangGraph
-- **大模型**: 豆包 (Doubao Seed)
-- **数据库**: PostgreSQL
-- **缓存**: Redis (可选)
-- **认证**: JWT
-
-### 前端
-
-- **框架**: React 18, Vite
-- **UI库**: Ant Design
-- **状态管理**: Redux Toolkit
-- **HTTP**: Axios
-- **路由**: React Router
-
-## 🧪 测试
+### 认证接口
 
 ```bash
-# 运行后端测试
-pytest tests/
+# 用户注册
+POST /api/auth/register
+{
+  "username": "xiaoming",
+  "password": "password123",
+  "role": "student",
+  "student_name": "小明",
+  "grade": "三年级"
+}
 
-# 运行前端测试
-cd magic-school-frontend
-npm test
+# 用户登录
+POST /api/auth/login
+{
+  "username": "xiaoming",
+  "password": "password123"
+}
 
-# 测试Agent服务
-bash scripts/test_agent.sh
+# 刷新Token
+POST /api/auth/refresh
+{
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
 
-# 测试所有服务
-bash scripts/test_services.sh
+# 登出
+POST /api/auth/logout
+Headers: Authorization: Bearer <access_token>
 ```
 
-## 📦 部署
-
-### 方式1: 扣子平台部署（推荐）⭐
-
-最简单快捷的部署方式，一键部署到Coze平台。
-
-**步骤**：
-1. 查看 [扣子平台部署指南](docs/扣子编程项目部署实际操作指南.md)
-2. 使用 [快速参考卡](docs/扣子平台部署快速参考卡.md) 快速配置
-3. 配置环境变量（见 [环境变量模板](docs/生产环境变量配置模板.txt)）
-4. 点击部署，3-5分钟即可完成
-
-**优势**：
-- ✅ 无需服务器
-- ✅ 自动域名
-- ✅ 一键部署
-- ✅ 自动扩展
-
-### 方式2: Docker部署
+### 对话接口
 
 ```bash
-# 构建镜像
-docker-compose build
+# 普通对话
+POST /api/v1/chat
+Headers: Authorization: Bearer <access_token>
+{
+  "message": "你好",
+  "session_id": "sess_123"
+}
 
-# 启动服务
-docker-compose up -d
+# 流式对话（SSE）
+POST /api/v1/chat/stream
+Headers: Authorization: Bearer <access_token>
+{
+  "message": "你好",
+  "session_id": "sess_123"
+}
+
+# WebSocket实时对话
+ws://localhost:5000/ws/chat?token=<access_token>&sessionId=<session_id>
 ```
 
-### 方式3: 手动部署
+### 数据管理接口
 
-详见 [部署指南](DEPLOYMENT_GUIDE.md)
+```bash
+# 获取学生仪表盘
+GET /api/v1/students/dashboard/{student_name}
+Headers: Authorization: Bearer <access_token>
 
-**环境要求**：
-- Python 3.8+
-- Node.js 18+
-- PostgreSQL 13+
-- Redis 6+ (可选)
+# 获取课程表
+GET /api/v1/courses/schedule/{student_name}
+Headers: Authorization: Bearer <access_token>
 
-## 🤝 贡献
+# 获取作业列表
+GET /api/v1/homeworks?student_id=1
+Headers: Authorization: Bearer <access_token>
 
-欢迎贡献代码！请查看 [CONTRIBUTING.md](CONTRIBUTING.md)
+# 获取成就列表
+GET /api/v1/achievements?student_id=1
+Headers: Authorization: Bearer <access_token>
 
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
-
-## 👥 团队
-
-- 开发: Magic School Team
-
-## 🙏 致谢
-
-- [LangGraph](https://github.com/langchain-ai/langgraph)
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [豆包大模型](https://www.volcengine.com/product/ark)
-
-## 📞 联系
-
-- 项目地址: https://github.com/your-username/magic-school-agent
-- 问题反馈: https://github.com/your-username/magic-school-agent/issues
+# 搜索对话会话
+GET /api/v1/conversations/search?keyword=数学&user_id=usr_123
+Headers: Authorization: Bearer <access_token>
+```
 
 ---
 
-**让学习充满魔法！** ✨🪄
+## 🧪 测试
+
+### 运行测试
+
+```bash
+# 运行所有测试
+pytest tests/
+
+# 运行特定测试
+pytest tests/test_agent_completeness.py
+pytest tests/test_multiuser.py
+
+# 运行完整功能测试
+python scripts/test_full_functionality.py
+```
+
+### 测试账号
+
+- **学生**: `student` / `password123`
+- **家长**: `parent` / `password123`
+
+---
+
+## 🔒 安全机制
+
+### 认证安全
+- ✅ 密码加密（bcrypt）
+- ✅ JWT Token认证
+- ✅ Token过期机制（24小时）
+- ✅ Refresh Token机制（7天）
+- ✅ 防暴力破解（失败次数限制）
+
+### 数据安全
+- ✅ SQL注入防护（ORM参数化查询）
+- ✅ XSS防护（输入验证和输出编码）
+- ✅ CSRF防护（Token验证）
+- ✅ 数据隔离（多租户架构）
+- ✅ 敏感数据加密
+
+### API安全
+- ✅ HTTPS加密传输
+- ✅ 速率限制
+- ✅ 请求大小限制
+- ✅ IP白名单（可选）
+- ✅ API Key管理
+
+---
+
+## 📊 架构说明
+
+### 系统架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    FastAPI 后端服务                          │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              API路由层 (API Routes)                 │    │
+│  │  - /api/v1/auth/* (认证)                            │    │
+│  │  - /api/v1/students/* (学生管理)                    │    │
+│  │  - /api/v1/courses/* (课程管理)                     │    │
+│  │  - /api/v1/homeworks/* (作业管理)                   │    │
+│  │  - /api/v1/chat/* (对话接口)                        │    │
+│  │  - /ws/chat (WebSocket)                             │    │
+│  └─────────────────────────────────────────────────────┘    │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              业务层 (Business Logic)                 │    │
+│  │  - UserManager (用户管理)                           │    │
+│  │  - StudentManager (学生管理)                        │    │
+│  │  - HomeworkManager (作业管理)                       │    │
+│  │  - CourseManager (课程管理)                         │    │
+│  └─────────────────────────────────────────────────────┘    │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              Agent层 (LangGraph Agent)               │    │
+│  │  - Multi-Agent架构                                  │    │
+│  │  - 工具调用 (30+ tools)                             │    │
+│  │  - 长期记忆管理                                      │    │
+│  │  - 数据隔离                                         │    │
+│  └─────────────────────────────────────────────────────┘    │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              数据层 (Data Access)                    │    │
+│  │  - SQLAlchemy ORM                                    │    │
+│  │  - PostgreSQL数据库                                  │    │
+│  │  - 会话管理 (Session Manager)                        │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+                      │ SQL
+                      │
+┌─────────────────────▼───────────────────────────────────────┐
+│                    PostgreSQL 数据库                         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │  auth       │  │  public     │  │  memory     │         │
+│  │  schema     │  │  schema     │  │  schema     │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 部署
+
+### 快速部署（扣子平台）
+
+```bash
+# 1. 准备环境变量
+cat > .env.production << 'EOF'
+DASHSCOPE_API_KEY=sk-your-api-key-here
+OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+JWT_SECRET=your-super-secret-jwt-key
+DEBUG=False
+LOG_LEVEL=INFO
+EOF
+
+# 2. 推送到GitHub
+git add .
+git commit -m "准备部署"
+git push origin main
+
+# 3. 在扣子平台创建项目并部署
+# 参考: docs/扣子平台部署指南.md
+```
+
+### 生产部署（阿里云ECS）
+
+```bash
+# 参考: DEPLOYMENT_GUIDE_COMPLETE.md
+# 1. 购买ECS服务器
+# 2. 配置安全组
+# 3. 安装依赖
+# 4. 配置Nginx
+# 5. 配置SSL证书
+# 6. 启动服务
+```
+
+---
+
+## 📞 技术支持
+
+- **文档**: `/workspace/projects/docs/`
+- **测试脚本**: `/workspace/projects/scripts/`
+- **日志目录**: `/workspace/projects/logs/`
+
+---
+
+## 📄 许可证
+
+MIT License
+
+---
+
+**本项目专注于后端API服务开发，不包含前端代码。**
